@@ -14,8 +14,8 @@ public class BreakABone implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		BreakABoneCommands.initialize();
-		BreakABoneConfigs.initialize();
 		BreakABoneCallbacks.initialize();
 		BreakABoneComponents.initialize();
+		BreakABoneScreenHandlers.initialize();
 	}
 }

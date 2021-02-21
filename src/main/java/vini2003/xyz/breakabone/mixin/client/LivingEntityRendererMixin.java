@@ -26,7 +26,7 @@ public class LivingEntityRendererMixin <T extends LivingEntity, M extends Entity
 			
 			if (bodyParts.hasHead()) {
 				matrixStack.translate(0F, 1.8F - dimensions.height, 0F);
-			} else if ((bodyParts.hasLeftArm() || bodyParts.hasRightArm()) && (!bodyParts.hasLeftLeg() && !bodyParts.hasRightLeg())) {
+			} else if ((bodyParts.hasLeftArm() || bodyParts.hasRightArm() || bodyParts.hasTorso()) && (!bodyParts.hasLeftLeg() && !bodyParts.hasRightLeg())) {
 				matrixStack.translate(0F, 0.675F, 0F);
 			}
 		}

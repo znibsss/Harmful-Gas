@@ -5,6 +5,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.options.GameOptions;
 import vini2003.xyz.breakabone.registry.client.BreakABoneCallbacks;
+import vini2003.xyz.breakabone.registry.client.BreakABoneScreens;
 
 @Environment(EnvType.CLIENT)
 public class BreakABoneClient implements ClientModInitializer {
@@ -13,5 +14,6 @@ public class BreakABoneClient implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
 		BreakABoneCallbacks.initialize();
+		BreakABoneScreens.initialize();
 	}
 }

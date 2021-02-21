@@ -19,9 +19,6 @@
     "main": [
       "vini2003.xyz.breakabone.BreakABone"
     ],
-    "modmenu": [
-      "vini2003.xyz.breakabone.client.modmenu.BreakABoneModMenu"
-    ],
     "cardinal-components": [
       "vini2003.xyz.breakabone.registry.common.BreakABoneComponents"
     ]
@@ -32,8 +29,7 @@
   "depends": {
     "fabricloader": ">=0.11.1",
     "fabric": ">=0.30.0+1.16",
-    "minecraft": "1.16.5",
-    "cloth-config2": ">=4.10.9"
+    "minecraft": "1.16.5"
   },
   "custom": {
     "cardinal-components": [

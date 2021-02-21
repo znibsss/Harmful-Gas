@@ -3,8 +3,10 @@ package vini2003.xyz.breakabone.common.component;
 import dev.onyxstudios.cca.api.v3.component.Component;
 import dev.onyxstudios.cca.api.v3.component.sync.AutoSyncedComponent;
 import dev.onyxstudios.cca.api.v3.entity.PlayerComponent;
+import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundTag;
+import vini2003.xyz.breakabone.common.miscellaneous.BodyPart;
 
 public class BodyPartComponent implements PlayerComponent<BodyPartComponent>, AutoSyncedComponent {
 	private boolean leftArm;
@@ -62,6 +64,10 @@ public class BodyPartComponent implements PlayerComponent<BodyPartComponent>, Au
 		this.rightArm = rightArm;
 		updateBoundingBox();
 	}
+
+	public boolean hasAnyArm() {
+		return hasLeftArm() || hasRightArm();
+	}
 	
 	public boolean hasLeftLeg() {
 		return leftLeg;
@@ -79,6 +85,10 @@ public class BodyPartComponent implements PlayerComponent<BodyPartComponent>, Au
 	public void setRightLeg(boolean rightLeg) {
 		this.rightLeg = rightLeg;
 		updateBoundingBox();
+	}
+	
+	public boolean hasAnyLeg() {
+		return hasLeftLeg() || hasRightLeg();
 	}
 	
 	public boolean hasHead() {
@@ -99,11 +109,59 @@ public class BodyPartComponent implements PlayerComponent<BodyPartComponent>, Au
 		updateBoundingBox();
 	}
 	
-	public PlayerEntity getPlayer() {
-		return player;
+	public float getHeight(EntityDimensions dimensions) {
+		float newHeight = dimensions.height;
+		
+		float headHeight = 0.25F * dimensions.height;
+		float armHeight = 0.375F * dimensions.height;
+		float legHeight = 0.368F * dimensions.height;
+		
+		if (!hasHead()) {
+			newHeight -= headHeight;
+		}
+		
+		if (!hasAnyArm() && !hasTorso()) {
+			newHeight -= armHeight;
+		}
+		
+		if (!hasAnyLeg()) {
+			newHeight -= legHeight;
+		}
+		
+		return newHeight;
 	}
 	
-	public void setPlayer(PlayerEntity player) {
-		this.player = player;
+	public void toggle(BodyPart part, boolean enabled) {
+		switch (part) {
+			case HEAD: {
+				head = enabled;
+				break;
+			}
+			
+			case TORSO: {
+				torso = enabled;
+				break;
+			}
+			
+			case LEFT_ARM: {
+				leftArm = enabled;
+				break;
+			}
+			
+			case RIGHT_ARM: {
+				rightArm = enabled;
+				break;
+			}
+			
+			case LEFT_LEG: {
+				leftLeg = enabled;
+				break;
+			}
+			
+			case RIGHT_LEG: {
+				rightLeg = enabled;
+				break;
+			}
+		}
 	}
 }

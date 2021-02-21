@@ -30,28 +30,8 @@ public abstract class PlayerEntityMixin {
 			EntityDimensions dimensions = POSE_DIMENSIONS.get(pose);
 			
 			BodyPartComponent bodyParts = BreakABoneComponents.BODY_PARTS.get(this);
-			
-			float newHeight = dimensions.height;
-			
-			if (!bodyParts.hasHead()) {
-				if ((bodyParts.hasLeftArm() || bodyParts.hasRightArm()) && (!bodyParts.hasLeftLeg() && !bodyParts.hasRightLeg())) {
-					newHeight *= 0.375F;
-				} else if ((bodyParts.hasLeftArm() || bodyParts.hasRightArm()) && (bodyParts.hasLeftLeg() || bodyParts.hasRightArm())) {
-					newHeight *= 0.7F;
-				} else if ((!bodyParts.hasLeftArm() && !bodyParts.hasRightArm()) && (bodyParts.hasLeftLeg() || bodyParts.hasRightLeg())) {
-					newHeight *= 0.375F;
-				}
-			} else {
-				if (bodyParts.hasLeftLeg() || bodyParts.hasRightLeg()) {
-					// Keeps the same value.
-				} else if (bodyParts.hasLeftArm() || bodyParts.hasRightArm()) {
-					newHeight *= 0.62F;
-				} else {
-					newHeight *= 0.25F;
-				}
-			}
-			
-			cir.setReturnValue(EntityDimensions.changing(dimensions.width, newHeight));
+
+			cir.setReturnValue(EntityDimensions.changing(dimensions.width, bodyParts.getHeight(dimensions)));
 			cir.cancel();
 		}
 	}
