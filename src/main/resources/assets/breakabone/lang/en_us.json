@@ -1,0 +1,5 @@
+{
+  "message.breakabone.inventory.no_right_arm": "You cannot use this with only your left arm!",
+  "message.breakabone.inventory.no_left_arm": "You cannot use this with only your right arm!",
+  "message.breakabone.inventory.no_arms": "You cannot use this with no arms!"
+}

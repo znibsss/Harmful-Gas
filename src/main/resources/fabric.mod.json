@@ -1,36 +1,43 @@
 {
   "schemaVersion": 1,
-  "id": "blackhole",
+  "id": "breakabonee",
   "version": "${version}",
-  "name": "Black Hole",
-  "description": "A mod adding black holes to the world of Minecraft.",
+  "name": "Break a Bone",
+  "description": "A mod adding a body part toggle and randomly mutating your body every few minutes.",
   "authors": [
     "vini2003",
     "Draylar"
   ],
   "contact": {},
   "license": "MIT",
-  "icon": "assets/blackhole/icon.png",
+  "icon": "assets/breakabone/icon.png",
   "environment": "*",
   "entrypoints": {
     "client": [
-      "vini2003.xyz.blackhole.BlackHoleClient"
+      "vini2003.xyz.breakabone.BreakABoneClient"
     ],
     "main": [
-      "vini2003.xyz.blackhole.BlackHole"
+      "vini2003.xyz.breakabone.BreakABone"
     ],
     "modmenu": [
-      "vini2003.xyz.blackhole.client.modmenu.BlackHoleModMenu"
+      "vini2003.xyz.breakabone.client.modmenu.BreakABoneModMenu"
+    ],
+    "cardinal-components": [
+      "vini2003.xyz.breakabone.registry.common.BreakABoneComponents"
     ]
   },
   "mixins": [
-    "blackhole.mixins.json"
+    "breakabone.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=0.11.1",
     "fabric": ">=0.30.0+1.16",
     "minecraft": "1.16.5",
-    "myron": ">=1.5.0",
     "cloth-config2": ">=4.10.9"
+  },
+  "custom": {
+    "cardinal-components": [
+      "breakabone:body_parts"
+    ]
   }
 }
