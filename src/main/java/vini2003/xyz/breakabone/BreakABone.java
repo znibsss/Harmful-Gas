@@ -17,5 +17,6 @@ public class BreakABone implements ModInitializer {
 		BreakABoneCallbacks.initialize();
 		BreakABoneComponents.initialize();
 		BreakABoneScreenHandlers.initialize();
+		BreakABoneNetworking.initialize();
 	}
 }

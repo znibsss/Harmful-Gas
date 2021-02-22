@@ -120,7 +120,7 @@ public class BodyPartComponent implements PlayerComponent<BodyPartComponent>, Au
 			newHeight -= headHeight;
 		}
 		
-		if (!hasAnyArm() && !hasTorso()) {
+		if (!hasAnyArm() && !hasTorso() && !hasAnyLeg()) {
 			newHeight -= armHeight;
 		}
 		
@@ -128,7 +128,7 @@ public class BodyPartComponent implements PlayerComponent<BodyPartComponent>, Au
 			newHeight -= legHeight;
 		}
 		
-		return newHeight;
+		return Math.max(0.125F, newHeight);
 	}
 	
 	public void toggle(BodyPart part, boolean enabled) {
