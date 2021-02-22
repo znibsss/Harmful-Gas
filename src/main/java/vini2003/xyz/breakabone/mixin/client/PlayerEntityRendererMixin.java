@@ -12,6 +12,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import vini2003.xyz.breakabone.client.utilities.BreakABoneClientUtilities;
 import vini2003.xyz.breakabone.common.component.BodyPartComponent;
+import vini2003.xyz.breakabone.registry.client.BreakABoneShaders;
 import vini2003.xyz.breakabone.registry.common.BreakABoneComponents;
 
 @Mixin(PlayerEntityRenderer.class)
@@ -39,5 +40,7 @@ public class PlayerEntityRendererMixin {
 		
 		model.leftLeg.visible = bodyParts.hasLeftLeg();
 		model.leftPantLeg.visible = bodyParts.hasLeftLeg();
+		
+		BreakABoneShaders.enableBlur = !bodyParts.hasHead();
 	}
 }

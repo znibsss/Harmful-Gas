@@ -20,6 +20,8 @@ repositories {
         name = "shedaniel"
         url = "https://maven.shedaniel.me/"
     }
+
+    jcenter()
 }
 
 dependencies {
@@ -37,6 +39,10 @@ dependencies {
 
     // Cardinal Components API
     modImplementation "com.github.OnyxStudios.Cardinal-Components-API:Cardinal-Components-API:${project.cardinal_components_api_version}"
+
+    // Satin
+    modImplementation "com.github.Ladysnake:Satin:${satin_version}"
+    include "com.github.Ladysnake:Satin:${satin_version}"
 
     // Blade
     modImplementation "com.github.vini2003:blade:${blade_version}"

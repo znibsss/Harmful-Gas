@@ -7,6 +7,7 @@ import net.minecraft.client.options.GameOptions;
 import vini2003.xyz.breakabone.registry.client.BreakABoneCallbacks;
 import vini2003.xyz.breakabone.registry.client.BreakABoneKeybinds;
 import vini2003.xyz.breakabone.registry.client.BreakABoneScreens;
+import vini2003.xyz.breakabone.registry.client.BreakABoneShaders;
 
 @Environment(EnvType.CLIENT)
 public class BreakABoneClient implements ClientModInitializer {
@@ -17,5 +18,6 @@ public class BreakABoneClient implements ClientModInitializer {
 		BreakABoneCallbacks.initialize();
 		BreakABoneScreens.initialize();
 		BreakABoneKeybinds.initialize();
+		BreakABoneShaders.initialize();
 	}
 }
