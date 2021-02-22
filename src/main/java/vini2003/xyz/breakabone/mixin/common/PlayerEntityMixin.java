@@ -52,8 +52,8 @@ public abstract class PlayerEntityMixin {
 			if (!bodyParts.hasHead() && !bodyParts.hasTorso() && !bodyParts.hasLeftArm() && !bodyParts.hasRightArm()) {
 				float multiplier = 1F;
 				
-				if (bodyParts.hasLeftLeg()) multiplier += 0.5F;
-				if (bodyParts.hasRightLeg()) multiplier += 0.5F;
+				if (bodyParts.hasLeftLeg()) multiplier += 0.125;
+				if (bodyParts.hasRightLeg()) multiplier += 0.125F;
 				
 				cir.setReturnValue(cir.getReturnValueF() * multiplier);
 				cir.cancel();
@@ -64,8 +64,8 @@ public abstract class PlayerEntityMixin {
 			if (!bodyParts.hasHead() && !bodyParts.hasTorso() && !bodyParts.hasLeftLeg() && !bodyParts.hasRightLeg()) {
 				float multiplier = 1F;
 				
-				if (bodyParts.hasLeftArm()) multiplier -= 0.25F;
-				if (bodyParts.hasRightArm()) multiplier -= 0.25F;
+				if (bodyParts.hasLeftArm()) multiplier -= 0.125F;
+				if (bodyParts.hasRightArm()) multiplier -= 0.125F;
 				
 				cir.setReturnValue(cir.getReturnValueF() * multiplier);
 				cir.cancel();

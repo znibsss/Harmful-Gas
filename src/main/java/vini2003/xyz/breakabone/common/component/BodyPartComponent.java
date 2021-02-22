@@ -122,6 +122,8 @@ public class BodyPartComponent implements PlayerComponent<BodyPartComponent>, Au
 		
 		if (!hasAnyArm() && !hasTorso() && !hasAnyLeg()) {
 			newHeight -= armHeight;
+		} else if (!hasHead() && !hasAnyArm() && !hasTorso() && hasAnyLeg()) {
+			newHeight -= armHeight;
 		}
 		
 		if (!hasAnyLeg()) {
