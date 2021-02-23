@@ -16,6 +16,15 @@ public class BodyPartComponent implements PlayerComponent<BodyPartComponent>, Au
 	private boolean head;
 	private boolean torso;
 	
+	private boolean blur;
+	
+	private boolean randomizeLeftArm = true;
+	private boolean randomizeRightArm = true;
+	private boolean randomizeLeftLeg = true;
+	private boolean randomizeRightLeg = true;
+	private boolean randomizeHead = true;
+	private boolean randomizeTorso = true;
+	
 	private PlayerEntity player;
 	
 	public BodyPartComponent(PlayerEntity player) {
@@ -30,6 +39,15 @@ public class BodyPartComponent implements PlayerComponent<BodyPartComponent>, Au
 		setRightLeg(compoundTag.getBoolean("RightLeg"));
 		setHead(compoundTag.getBoolean("Head"));
 		setTorso(compoundTag.getBoolean("Torso"));
+		
+		setBlur(compoundTag.getBoolean("Blur"));
+		
+		setRandomizeLeftArm(compoundTag.getBoolean("RandomizeLeftArm"));
+		setRandomizeRightArm(compoundTag.getBoolean("RandomizeRightArm"));
+		setRandomizeLeftLeg(compoundTag.getBoolean("RandomizeLeftLeg"));
+		setRandomizeRightLeg(compoundTag.getBoolean("RandomizeRightLeg"));
+		setRandomizeHead(compoundTag.getBoolean("RandomizeHead"));
+		setRandomizeTorso(compoundTag.getBoolean("RandomizeTorso"));
 	}
 	
 	@Override
@@ -40,6 +58,15 @@ public class BodyPartComponent implements PlayerComponent<BodyPartComponent>, Au
 		compoundTag.putBoolean("RightLeg", rightLeg);
 		compoundTag.putBoolean("Head", head);
 		compoundTag.putBoolean("Torso", torso);
+		
+		compoundTag.putBoolean("Blur", blur);
+		
+		compoundTag.putBoolean("RandomizeLeftArm", randomizeLeftArm);
+		compoundTag.putBoolean("RandomizeRightArm", randomizeRightArm);
+		compoundTag.putBoolean("RandomizeLeftLeg", randomizeLeftLeg);
+		compoundTag.putBoolean("RandomizeRightLeg", randomizeRightLeg);
+		compoundTag.putBoolean("RandomizeHead", randomizeHead);
+		compoundTag.putBoolean("RandomizeTorso", randomizeTorso);
 	}
 	
 	public void updateBoundingBox() {
@@ -107,6 +134,62 @@ public class BodyPartComponent implements PlayerComponent<BodyPartComponent>, Au
 	public void setTorso(boolean torso) {
 		this.torso = torso;
 		updateBoundingBox();
+	}
+	
+	public boolean hasBlur() {
+		return blur;
+	}
+	
+	public void setBlur(boolean blur) {
+		this.blur = blur;
+	}
+	
+	public boolean shouldRandomizeLeftArm() {
+		return randomizeLeftArm;
+	}
+	
+	public void setRandomizeLeftArm(boolean randomizeLeftArm) {
+		this.randomizeLeftArm = randomizeLeftArm;
+	}
+	
+	public boolean shouldRandomizeRightArm() {
+		return randomizeRightArm;
+	}
+	
+	public void setRandomizeRightArm(boolean randomizeRightArm) {
+		this.randomizeRightArm = randomizeRightArm;
+	}
+	
+	public boolean shouldRandomizeLeftLeg() {
+		return randomizeLeftLeg;
+	}
+	
+	public void setRandomizeLeftLeg(boolean randomizeLeftLeg) {
+		this.randomizeLeftLeg = randomizeLeftLeg;
+	}
+	
+	public boolean shouldRandomizeRightLeg() {
+		return randomizeRightLeg;
+	}
+	
+	public void setRandomizeRightLeg(boolean randomizeRightLeg) {
+		this.randomizeRightLeg = randomizeRightLeg;
+	}
+	
+	public boolean shouldRandomizeHead() {
+		return randomizeHead;
+	}
+	
+	public void setRandomizeHead(boolean randomizeHead) {
+		this.randomizeHead = randomizeHead;
+	}
+	
+	public boolean shouldRandomizeTorso() {
+		return randomizeTorso;
+	}
+	
+	public void setRandomizeTorso(boolean randomizeTorso) {
+		this.randomizeTorso = randomizeTorso;
 	}
 	
 	public float getHeight(EntityDimensions dimensions) {

@@ -10,6 +10,7 @@ import net.minecraft.util.Formatting;
 import net.minecraft.world.World;
 import vini2003.xyz.breakabone.common.component.BodyPartComponent;
 import vini2003.xyz.breakabone.common.component.TimerComponent;
+import vini2003.xyz.breakabone.common.screenhandler.BodyPartSelectorScreenHandler;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -54,17 +55,19 @@ public class BreakABoneCallbacks {
 			server.getPlayerManager().getPlayerList().forEach(player -> {
 				TimerComponent timer = BreakABoneComponents.TIMER.get(player);
 				
-				if (timer.hasMinutes(5)) {
+				if (timer.hasMinutes(5) && !(player.currentScreenHandler instanceof BodyPartSelectorScreenHandler)) {
 					timer.reset();
 					
 					BodyPartComponent bodyParts = BreakABoneComponents.BODY_PARTS.get(player);
 					
-					bodyParts.setHead(server.getWorld(World.OVERWORLD).getRandom().nextBoolean());
-					bodyParts.setTorso(server.getWorld(World.OVERWORLD).getRandom().nextBoolean());
-					bodyParts.setLeftArm(server.getWorld(World.OVERWORLD).getRandom().nextBoolean());
-					bodyParts.setRightArm(server.getWorld(World.OVERWORLD).getRandom().nextBoolean());
-					bodyParts.setLeftLeg(server.getWorld(World.OVERWORLD).getRandom().nextBoolean());
-					bodyParts.setRightLeg(server.getWorld(World.OVERWORLD).getRandom().nextBoolean());
+					if (bodyParts.shouldRandomizeHead()) bodyParts.setHead(server.getWorld(World.OVERWORLD).getRandom().nextBoolean());
+					if (bodyParts.shouldRandomizeTorso()) bodyParts.setTorso(server.getWorld(World.OVERWORLD).getRandom().nextBoolean());
+					if (bodyParts.shouldRandomizeLeftArm()) bodyParts.setLeftArm(server.getWorld(World.OVERWORLD).getRandom().nextBoolean());
+					if (bodyParts.shouldRandomizeRightArm()) bodyParts.setRightArm(server.getWorld(World.OVERWORLD).getRandom().nextBoolean());
+					if (bodyParts.shouldRandomizeLeftLeg()) bodyParts.setLeftLeg(server.getWorld(World.OVERWORLD).getRandom().nextBoolean());
+					if (bodyParts.shouldRandomizeRightLeg()) bodyParts.setRightLeg(server.getWorld(World.OVERWORLD).getRandom().nextBoolean());
+					
+					BreakABoneComponents.BODY_PARTS.sync(player);
 				}
 			});
 		});

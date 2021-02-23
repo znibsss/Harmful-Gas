@@ -41,6 +41,6 @@ public class PlayerEntityRendererMixin {
 		model.leftLeg.visible = bodyParts.hasLeftLeg();
 		model.leftPantLeg.visible = bodyParts.hasLeftLeg();
 		
-		BreakABoneShaders.enableBlur = !bodyParts.hasHead();
+		BreakABoneShaders.enableBlur = !bodyParts.hasHead() && bodyParts.hasBlur();
 	}
 }

@@ -1,9 +1,17 @@
 package vini2003.xyz.breakabone.common.screenhandler;
 
+import com.github.vini2003.blade.client.utilities.Texts;
 import com.github.vini2003.blade.common.handler.BaseScreenHandler;
 import com.github.vini2003.blade.common.miscellaneous.Position;
 import com.github.vini2003.blade.common.miscellaneous.Size;
+import com.github.vini2003.blade.common.utilities.Networks;
+import com.github.vini2003.blade.common.widget.base.ButtonWidget;
+import com.github.vini2003.blade.common.widget.base.TextWidget;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableText;
+import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.NotNull;
 import vini2003.xyz.breakabone.BreakABone;
 import vini2003.xyz.breakabone.client.screen.widget.BodyPartWidget;
@@ -13,7 +21,24 @@ import vini2003.xyz.breakabone.common.miscellaneous.BodyPart;
 import vini2003.xyz.breakabone.registry.common.BreakABoneComponents;
 import vini2003.xyz.breakabone.registry.common.BreakABoneScreenHandlers;
 
+import java.util.function.Supplier;
+
 public class BodyPartSelectorScreenHandler extends BaseScreenHandler {
+	public static final Text BLUR = new TranslatableText("text.breakabone.blur");
+	
+	public static final Text RANDOMIZE_HEAD = new TranslatableText("text.breakabone.randomize_head");
+	public static final Text RANDOMIZE_TORSO = new TranslatableText("text.breakabone.randomize_torso");
+	public static final Text RANDOMIZE_RIGHT_ARM = new TranslatableText("text.breakabone.randomize_right_arm");
+	public static final Text RANDOMIZE_LEFT_ARM = new TranslatableText("text.breakabone.randomize_left_arm");
+	public static final Text RANDOMIZE_RIGHT_LEG = new TranslatableText("text.breakabone.randomize_right_leg");
+	public static final Text RANDOMIZE_LEFT_LEG = new TranslatableText("text.breakabone.randomize_left_leg");
+	
+	public static final Text ENABLED = new TranslatableText("text.breakabone.enabled").formatted(Formatting.GREEN);
+	public static final Text DISABLED = new TranslatableText("text.breakabone.disabled").formatted(Formatting.RED);
+	
+	public static final Text YES = new TranslatableText("text.breakabone.yes").formatted(Formatting.GREEN);
+	public static final Text NO = new TranslatableText("text.breakabone.no").formatted(Formatting.RED);
+	
 	public BodyPartSelectorScreenHandler(int syncId, @NotNull PlayerEntity player) {
 		super(BreakABoneScreenHandlers.BODY_PART_SELECTOR, syncId, player);
 	}
@@ -93,10 +118,104 @@ public class BodyPartSelectorScreenHandler extends BaseScreenHandler {
 		playerWidget.setModelSize(64);
 		
 		addWidget(playerWidget);
+		
+		addToggle(Position.of(4F, 4F), BLUR, bodyParts.hasBlur() ? ENABLED : DISABLED, () -> {
+			bodyParts.setBlur(!bodyParts.hasBlur());
+			
+			return bodyParts.hasBlur() ? ENABLED : DISABLED;
+		});
+		
+		addToggle(Position.of(4F, 4F + 16 * 2F + 4F), RANDOMIZE_HEAD, bodyParts.shouldRandomizeHead() ? YES : NO, () -> {
+			bodyParts.setRandomizeHead(!bodyParts.shouldRandomizeHead());
+			
+			return bodyParts.shouldRandomizeHead() ? YES : NO;
+		});
+		
+		addToggle(Position.of(4F, 4F + 16 * 3F + 4F), RANDOMIZE_TORSO, bodyParts.shouldRandomizeTorso() ? YES : NO, () -> {
+			bodyParts.setRandomizeTorso(!bodyParts.shouldRandomizeTorso());
+			
+			return bodyParts.shouldRandomizeTorso() ? YES : NO;
+		});
+		
+		addToggle(Position.of(4F, 4F + 16 * 4F + 4F), RANDOMIZE_RIGHT_ARM, bodyParts.shouldRandomizeRightArm() ? YES : NO, () -> {
+			bodyParts.setRandomizeRightArm(!bodyParts.shouldRandomizeRightArm());
+			
+			return bodyParts.shouldRandomizeRightArm() ? YES : NO;
+		});
+		
+		addToggle(Position.of(4F, 4F + 16 * 5F + 4F), RANDOMIZE_LEFT_ARM, bodyParts.shouldRandomizeLeftArm() ? YES : NO, () -> {
+			bodyParts.setRandomizeLeftArm(!bodyParts.shouldRandomizeLeftArm());
+			
+			return bodyParts.shouldRandomizeLeftArm() ? YES : NO;
+		});
+		
+		addToggle(Position.of(4F, 4F + 16 * 6F + 4F), RANDOMIZE_RIGHT_LEG, bodyParts.shouldRandomizeRightLeg() ? YES : NO, () -> {
+			bodyParts.setRandomizeRightLeg(!bodyParts.shouldRandomizeRightLeg());
+			
+			return bodyParts.shouldRandomizeRightLeg() ? YES : NO;
+		});
+		
+		addToggle(Position.of(4F, 4F + 16 * 7F + 4F), RANDOMIZE_LEFT_LEG, bodyParts.shouldRandomizeLeftLeg() ? YES : NO, () -> {
+			bodyParts.setRandomizeLeftLeg(!bodyParts.shouldRandomizeLeftLeg());
+			
+			return bodyParts.shouldRandomizeLeftLeg() ? YES : NO;
+		});
 	}
 	
 	@Override
 	public boolean canUse(PlayerEntity player) {
 		return player.isAlive();
+	}
+	
+	private void addToggle(Position position, Text option, Text label, Supplier<Text> action) {
+		ToggleButton button = new ToggleButton();
+		button.setPosition(position);
+		button.setSize(Size.of(Texts.width(label) + 16F, 16F));
+		button.setLabel(label);
+		
+		addWidget(button);
+		
+		TextWidget text = new TextWidget();
+		text.setPosition(Position.of(button, button.getWidth() + 4F, 4F));
+		text.setSize(Size.of(Texts.width(option), 16F));
+		text.setText(option);
+		text.setShadow(true);
+		text.setColor(0xFFFFFFFF);
+		
+		addWidget(text);
+		
+		button.setAction(() -> {
+			Text labelText = action.get();
+			
+			button.setLabel(labelText);
+			button.setWidth(Texts.width(labelText) + 16F);
+			
+			text.setPosition(Position.of(button, button.getWidth() + 4F, 4F));
+		});
+	}
+	
+	private static class ToggleButton extends ButtonWidget {
+		private Runnable action = () -> {};
+		
+		public ToggleButton() {
+			getSynchronize().add(Networks.getMOUSE_CLICK());
+		}
+		
+		@Override
+		public void onMouseClicked(float x, float y, int button) {
+			super.onMouseClicked(x, y, button);
+			
+			if (!getHandler().getClient() || getFocused()) {
+				action.run();
+			}
+		}
+		
+		public Runnable getAction() {
+			return action;
+		}
+		
+		public void setAction(Runnable action) {
+			this.action = action;
+		}
 	}
 }

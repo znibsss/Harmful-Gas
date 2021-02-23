@@ -5,6 +5,7 @@ import dev.onyxstudios.cca.api.v3.component.sync.AutoSyncedComponent;
 import dev.onyxstudios.cca.api.v3.entity.PlayerComponent;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundTag;
+import vini2003.xyz.breakabone.registry.common.BreakABoneComponents;
 
 import static java.lang.System.nanoTime;
 
@@ -35,8 +36,12 @@ public class TimerComponent implements PlayerComponent<TimerComponent>, AutoSync
 		return nanoTime() - origin > nanoseconds;
 	}
 	
+	public boolean hasMicroseconds(long microseconds) {
+		return hasNanoseconds(microseconds * 1_000L);
+	}
+	
 	public boolean hasMilliseconds(long milliseconds) {
-		return hasNanoseconds(milliseconds * 1_000L);
+		return hasMicroseconds(milliseconds * 1_000L);
 	}
 	
 	public boolean hasSeconds(long seconds) {
@@ -44,14 +49,14 @@ public class TimerComponent implements PlayerComponent<TimerComponent>, AutoSync
 	}
 	
 	public boolean hasMinutes(long minutes) {
-		return hasSeconds(minutes * 60);
+		return hasSeconds(minutes * 60L);
 	}
 	
 	public boolean hasHours(long hours) {
-		return hasMinutes(hours * 60);
+		return hasMinutes(hours * 60L);
 	}
 	
 	public boolean hasDays(long days) {
-		return hasHours(days * 24);
+		return hasHours(days * 24L);
 	}
 }
