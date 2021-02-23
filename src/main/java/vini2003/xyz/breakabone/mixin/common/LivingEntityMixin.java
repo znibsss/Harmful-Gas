@@ -22,28 +22,32 @@ public abstract class LivingEntityMixin {
 		if ((Object) this instanceof PlayerEntity) {
 			BodyPartComponent bodyParts = BreakABoneComponents.BODY_PARTS.get(this);
 			
-			if (!bodyParts.hasHead() && !bodyParts.hasTorso() && !bodyParts.hasLeftArm() && !bodyParts.hasRightArm()) {
-				float multiplier = 1F;
-				
-				if (bodyParts.hasLeftLeg()) multiplier += 0.125F;
-				if (bodyParts.hasRightLeg()) multiplier += 0.125F;
-				
-				cir.setReturnValue(cir.getReturnValueF() * multiplier);
-				cir.cancel();
-				
-				return;
+			if (bodyParts.hasJumpIncrease()) {
+				if (!bodyParts.hasHead() && !bodyParts.hasTorso() && !bodyParts.hasLeftArm() && !bodyParts.hasRightArm()) {
+					float multiplier = 1F;
+					
+					if (bodyParts.hasLeftLeg()) multiplier += 0.125F;
+					if (bodyParts.hasRightLeg()) multiplier += 0.125F;
+					
+					cir.setReturnValue(cir.getReturnValueF() * multiplier);
+					cir.cancel();
+					
+					return;
+				}
 			}
 			
-			if (!bodyParts.hasHead() && !bodyParts.hasTorso() && !bodyParts.hasLeftLeg() && !bodyParts.hasRightLeg()) {
-				float multiplier = 1F;
-
-				if (bodyParts.hasLeftArm()) multiplier -= 0.125F;
-				if (bodyParts.hasRightArm()) multiplier -= 0.125F;
-				
-				cir.setReturnValue(cir.getReturnValueF() * multiplier);
-				cir.cancel();
-				
-				return;
+			if (bodyParts.hasJumpDecrease()) {
+				if (!bodyParts.hasHead() && !bodyParts.hasTorso() && !bodyParts.hasLeftLeg() && !bodyParts.hasRightLeg()) {
+					float multiplier = 1F;
+					
+					if (bodyParts.hasLeftArm()) multiplier -= 0.125F;
+					if (bodyParts.hasRightArm()) multiplier -= 0.125F;
+					
+					cir.setReturnValue(cir.getReturnValueF() * multiplier);
+					cir.cancel();
+					
+					return;
+				}
 			}
 		}
 	}
@@ -53,9 +57,11 @@ public abstract class LivingEntityMixin {
 		if ((Object) this instanceof PlayerEntity) {
 			BodyPartComponent bodyParts = BreakABoneComponents.BODY_PARTS.get(this);
 			
-			if (!bodyParts.hasAnyLeg() && !bodyParts.hasAnyArm()) {
-				cir.setReturnValue(false);
-				cir.cancel();
+			if (bodyParts.hasClimbingLimitations()) {
+				if (!bodyParts.hasAnyLeg() && !bodyParts.hasAnyArm()) {
+					cir.setReturnValue(false);
+					cir.cancel();
+				}
 			}
 		}
 	}
@@ -63,16 +69,18 @@ public abstract class LivingEntityMixin {
 	@Inject(at = @At("RETURN"), method = "travel")
 	void breakabone_travel(Vec3d movementInput, CallbackInfo ci) {
 		if((Object) this instanceof PlayerEntity && isClimbing()) {
-			PlayerEntity player = (PlayerEntity) (Object) this;
-			
 			BodyPartComponent bodyParts = BreakABoneComponents.BODY_PARTS.get(this);
 			
-			if (!bodyParts.hasAnyArm()) {
-				player.setVelocity(player.getVelocity().getX(), player.getVelocity().getY() * 0.75F, player.getVelocity().getZ());
-			}
-			
-			if (!bodyParts.hasAnyLeg()) {
-				player.setVelocity(player.getVelocity().getX(), player.getVelocity().getY() * 0.75F, player.getVelocity().getZ());
+			if (bodyParts.hasClimbingLimitations()) {
+				PlayerEntity player = (PlayerEntity) (Object) this;
+				
+				if (!bodyParts.hasAnyArm()) {
+					player.setVelocity(player.getVelocity().getX(), player.getVelocity().getY() * 0.75F, player.getVelocity().getZ());
+				}
+				
+				if (!bodyParts.hasAnyLeg()) {
+					player.setVelocity(player.getVelocity().getX(), player.getVelocity().getY() * 0.75F, player.getVelocity().getZ());
+				}
 			}
 		}
 	}
@@ -80,36 +88,38 @@ public abstract class LivingEntityMixin {
 	@Inject(at = @At("RETURN"), method = "getMaxHealth", cancellable = true)
 	void breakabone_getMaxHealth(CallbackInfoReturnable<Float> cir) {
 		if ((Object) this instanceof PlayerEntity) {
-			float healthMultiplier = 1F;
-			
 			BodyPartComponent bodyParts = BreakABoneComponents.BODY_PARTS.get(this);
 			
-			if (!bodyParts.hasHead()) {
-				healthMultiplier -= 0.125F;
+			if (bodyParts.hasHealthLimitations()) {
+				float healthMultiplier = 1F;
+				
+				if (!bodyParts.hasHead()) {
+					healthMultiplier -= 0.125F;
+				}
+				
+				if (!bodyParts.hasLeftArm()) {
+					healthMultiplier -= 0.125F;
+				}
+				
+				if (!bodyParts.hasRightArm()) {
+					healthMultiplier -= 0.125F;
+				}
+				
+				if (!bodyParts.hasTorso()) {
+					healthMultiplier -= 0.25F;
+				}
+				
+				if (!bodyParts.hasLeftLeg()) {
+					healthMultiplier -= 0.175F;
+				}
+				
+				if (!bodyParts.hasRightLeg()) {
+					healthMultiplier -= 0.175F;
+				}
+				
+				cir.setReturnValue(cir.getReturnValueF() * Math.max(0.125F, healthMultiplier));
+				cir.cancel();
 			}
-			
-			if (!bodyParts.hasLeftArm()) {
-				healthMultiplier -= 0.125F;
-			}
-			
-			if (!bodyParts.hasRightArm()) {
-				healthMultiplier -= 0.125F;
-			}
-			
-			if (!bodyParts.hasTorso()) {
-				healthMultiplier -= 0.25F;
-			}
-			
-			if (!bodyParts.hasLeftLeg()) {
-				healthMultiplier -= 0.175F;
-			}
-			
-			if (!bodyParts.hasRightLeg()) {
-				healthMultiplier -= 0.175F;
-			}
-			
-			cir.setReturnValue(cir.getReturnValueF() * Math.max(0.125F, healthMultiplier));
-			cir.cancel();
 		}
 	}
 }

@@ -1,6 +1,5 @@
 package vini2003.xyz.breakabone.common.component;
 
-import dev.onyxstudios.cca.api.v3.component.Component;
 import dev.onyxstudios.cca.api.v3.component.sync.AutoSyncedComponent;
 import dev.onyxstudios.cca.api.v3.entity.PlayerComponent;
 import net.minecraft.entity.EntityDimensions;
@@ -25,6 +24,19 @@ public class BodyPartComponent implements PlayerComponent<BodyPartComponent>, Au
 	private boolean randomizeHead = true;
 	private boolean randomizeTorso = true;
 	
+	private boolean speedIncrease = true;
+	private boolean speedDecrease = true;
+	
+	private boolean jumpIncrease = true;
+	private boolean jumpDecrease = true;
+	
+	private boolean singleHandLimitations = true;
+	private boolean noHandLimitations = true;
+	
+	private boolean healthLimitations = true;
+	
+	private boolean climbingLimitations = true;
+	
 	private PlayerEntity player;
 	
 	public BodyPartComponent(PlayerEntity player) {
@@ -48,6 +60,19 @@ public class BodyPartComponent implements PlayerComponent<BodyPartComponent>, Au
 		setRandomizeRightLeg(compoundTag.getBoolean("RandomizeRightLeg"));
 		setRandomizeHead(compoundTag.getBoolean("RandomizeHead"));
 		setRandomizeTorso(compoundTag.getBoolean("RandomizeTorso"));
+		
+		setSpeedIncrease(compoundTag.getBoolean("SpeedIncrease"));
+		setSpeedDecrease(compoundTag.getBoolean("SpeedDecrease"));
+		
+		setJumpIncrease(compoundTag.getBoolean("JumpIncrease"));
+		setJumpDecrease(compoundTag.getBoolean("JumpDecrease"));
+		
+		setSingleHandLimitations(compoundTag.getBoolean("SingleHandLimitations"));
+		setNoHandLimitations(compoundTag.getBoolean("NoHandLimitations"));
+		
+		setHealthLimitations(compoundTag.getBoolean("HealthLimitations"));
+		
+		setClimbingLimitations(compoundTag.getBoolean("ClimbingLimitations"));
 	}
 	
 	@Override
@@ -67,6 +92,19 @@ public class BodyPartComponent implements PlayerComponent<BodyPartComponent>, Au
 		compoundTag.putBoolean("RandomizeRightLeg", randomizeRightLeg);
 		compoundTag.putBoolean("RandomizeHead", randomizeHead);
 		compoundTag.putBoolean("RandomizeTorso", randomizeTorso);
+		
+		compoundTag.putBoolean("SpeedIncrease", speedIncrease);
+		compoundTag.putBoolean("SpeedDecrease", speedDecrease);
+		
+		compoundTag.putBoolean("JumpIncrease", jumpIncrease);
+		compoundTag.putBoolean("JumpDecrease", jumpDecrease);
+		
+		compoundTag.putBoolean("SingleHandLimitations", singleHandLimitations);
+		compoundTag.putBoolean("NoHandLimitations", noHandLimitations);
+		
+		compoundTag.putBoolean("HealthLimitations", healthLimitations);
+		
+		compoundTag.putBoolean("ClimbingLimitations", climbingLimitations);
 	}
 	
 	public void updateBoundingBox() {
@@ -190,6 +228,70 @@ public class BodyPartComponent implements PlayerComponent<BodyPartComponent>, Au
 	
 	public void setRandomizeTorso(boolean randomizeTorso) {
 		this.randomizeTorso = randomizeTorso;
+	}
+	
+	public boolean hasSpeedIncrease() {
+		return speedIncrease;
+	}
+	
+	public void setSpeedIncrease(boolean speedIncrease) {
+		this.speedIncrease = speedIncrease;
+	}
+	
+	public boolean hasSpeedDecrease() {
+		return speedDecrease;
+	}
+	
+	public void setSpeedDecrease(boolean speedDecrease) {
+		this.speedDecrease = speedDecrease;
+	}
+	
+	public boolean hasJumpIncrease() {
+		return jumpIncrease;
+	}
+	
+	public void setJumpIncrease(boolean jumpIncrease) {
+		this.jumpIncrease = jumpIncrease;
+	}
+	
+	public boolean hasJumpDecrease() {
+		return jumpDecrease;
+	}
+	
+	public void setJumpDecrease(boolean jumpDecrease) {
+		this.jumpDecrease = jumpDecrease;
+	}
+	
+	public boolean hasSingleHandLimitations() {
+		return singleHandLimitations;
+	}
+	
+	public void setSingleHandLimitations(boolean singleHandLimitations) {
+		this.singleHandLimitations = singleHandLimitations;
+	}
+	
+	public boolean hasNoHandLimitations() {
+		return noHandLimitations;
+	}
+	
+	public void setNoHandLimitations(boolean noHandLimitations) {
+		this.noHandLimitations = noHandLimitations;
+	}
+	
+	public boolean hasHealthLimitations() {
+		return healthLimitations;
+	}
+	
+	public void setHealthLimitations(boolean healthLimitations) {
+		this.healthLimitations = healthLimitations;
+	}
+	
+	public boolean hasClimbingLimitations() {
+		return climbingLimitations;
+	}
+	
+	public void setClimbingLimitations(boolean climbingLimitations) {
+		this.climbingLimitations = climbingLimitations;
 	}
 	
 	public float getHeight(EntityDimensions dimensions) {
