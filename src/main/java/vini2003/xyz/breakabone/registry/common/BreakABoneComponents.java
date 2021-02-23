@@ -6,9 +6,11 @@ import dev.onyxstudios.cca.api.v3.entity.EntityComponentFactoryRegistry;
 import dev.onyxstudios.cca.api.v3.entity.EntityComponentInitializer;
 import vini2003.xyz.breakabone.BreakABone;
 import vini2003.xyz.breakabone.common.component.BodyPartComponent;
+import vini2003.xyz.breakabone.common.component.TimerComponent;
 
 public class BreakABoneComponents implements EntityComponentInitializer {
 	public static final ComponentKey<BodyPartComponent> BODY_PARTS = ComponentRegistry.getOrCreate(BreakABone.identifier("body_parts"), BodyPartComponent.class);
+	public static final ComponentKey<TimerComponent> TIMER = ComponentRegistry.getOrCreate(BreakABone.identifier("timer"), TimerComponent.class);
 	
 	public static void initialize() {
 	
@@ -17,5 +19,6 @@ public class BreakABoneComponents implements EntityComponentInitializer {
 	@Override
 	public void registerEntityComponentFactories(EntityComponentFactoryRegistry entityComponentFactoryRegistry) {
 		entityComponentFactoryRegistry.registerForPlayers(BODY_PARTS, BodyPartComponent::new);
+		entityComponentFactoryRegistry.registerForPlayers(TIMER, TimerComponent::new);
 	}
 }

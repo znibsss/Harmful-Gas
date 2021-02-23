@@ -1,14 +1,15 @@
 {
   "schemaVersion": 1,
-  "id": "breakabonee",
+  "id": "breakabone",
   "version": "${version}",
   "name": "Break a Bone",
   "description": "A mod adding a body part toggle and randomly mutating your body every few minutes.",
   "authors": [
-    "vini2003",
-    "Draylar"
+    "vini2003"
   ],
-  "contact": {},
+  "contact": {
+    "email": "contact@vini2003.xyz"
+  },
   "license": "MIT",
   "icon": "assets/breakabone/icon.png",
   "environment": "*",
@@ -33,7 +34,8 @@
   },
   "custom": {
     "cardinal-components": [
-      "breakabone:body_parts"
+      "breakabone:body_parts",
+      "breakabone:timer"
     ]
   }
 }
