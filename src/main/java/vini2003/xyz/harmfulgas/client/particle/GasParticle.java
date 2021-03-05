@@ -1,0 +1,37 @@
+package vini2003.xyz.harmfulgas.client.particle;
+
+import net.minecraft.client.particle.*;
+import net.minecraft.client.world.ClientWorld;
+import net.minecraft.particle.DefaultParticleType;
+import org.jetbrains.annotations.Nullable;
+import vini2003.xyz.harmfulgas.registry.client.HarmfulGasTextureSheets;
+
+public class GasParticle extends SpriteBillboardParticle {
+	public GasParticle(ClientWorld clientWorld, double x, double y, double z) {
+		super(clientWorld, x, y, z);
+		maxAge = Integer.MAX_VALUE;
+	}
+	
+	@Override
+	public ParticleTextureSheet getType() {
+		return HarmfulGasTextureSheets.GAS;
+	}
+	
+	public static class Factory implements ParticleFactory<DefaultParticleType> {
+		private final SpriteProvider spriteProvider;
+		
+		public Factory(SpriteProvider spriteProvider) {
+			this.spriteProvider = spriteProvider;
+		}
+		
+		@Nullable
+		@Override
+		public Particle createParticle(DefaultParticleType parameters, ClientWorld world, double x, double y, double z, double velocityX, double velocityY, double velocityZ) {
+			GasParticle gasParticle = new GasParticle(world, x, y, z);
+			gasParticle.setSprite(spriteProvider);
+			gasParticle.scale = 8F;
+			gasParticle.colorAlpha = 0.125F;
+			return gasParticle;
+		}
+	}
+}

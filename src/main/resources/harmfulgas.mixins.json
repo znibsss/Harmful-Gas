@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "vini2003.xyz.harmfulgas.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+    "client.ParticleManagerMixin"
+  ],
+  "client": [
+    "client.InGameHudMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

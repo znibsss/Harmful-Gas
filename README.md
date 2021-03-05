@@ -1,13 +1,9 @@
-# Break A Bone
+# Harmful Gas
 
-This mod randomly mutates your body every few minutes, and allows you to toggle them at will.
+This mod adds gases to your Minecraft world; some of whom may seek and destroy you.
 
 # Installing
 
 - Install Fabric from [their website](http://fabricmc.net/).
 
 - Place the mod under `%AppData%`, `.minecraft/mods`.
-
-# Using
-
-`C` opens the body part selector.
