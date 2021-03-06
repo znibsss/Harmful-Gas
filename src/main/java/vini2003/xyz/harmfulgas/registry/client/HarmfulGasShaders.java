@@ -13,7 +13,7 @@ public class HarmfulGasShaders {
 	
 	public static boolean enableBlur = true;
 	
-	public static float blurModifierStrength = 1.0F;
+	public static float blurModifierStrength = 0.0F;
 	
 	public static void initialize() {
 		ShaderEffectRenderCallback.EVENT.register(tickDelta -> {

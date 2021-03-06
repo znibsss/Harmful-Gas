@@ -9,7 +9,7 @@ import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraft.world.chunk.Chunk;
+import vini2003.xyz.harmfulgas.common.component.WorldGasComponent;
 
 public class HarmfulGasCommands {
 	public static int place(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
@@ -17,7 +17,7 @@ public class HarmfulGasCommands {
 		
 		World world = context.getSource().getWorld();
 		
-		HarmfulGasComponents.WORLD_GAS_COMPONENT.get(world).scheduleAddition(pos);
+		WorldGasComponent.get(world).add(pos);
 		
 		return 1;
 	}

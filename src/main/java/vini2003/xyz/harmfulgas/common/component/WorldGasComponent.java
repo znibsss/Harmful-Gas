@@ -33,18 +33,16 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.registry.Registry;
 import net.minecraft.world.Heightmap;
 import net.minecraft.world.World;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.WorldChunk;
 import dev.onyxstudios.cca.api.v3.component.Component;
 import dev.onyxstudios.cca.api.v3.component.tick.ServerTickingComponent;
 import org.jetbrains.annotations.Nullable;
 
+import vini2003.xyz.harmfulgas.common.utilities.DirectionUtilities;
+import vini2003.xyz.harmfulgas.common.utilities.WorldUtilities;
 import vini2003.xyz.harmfulgas.registry.client.HarmfulGasNetworking;
 import vini2003.xyz.harmfulgas.registry.common.HarmfulGasComponents;
 
@@ -61,35 +59,67 @@ public final class WorldGasComponent implements Component, ServerTickingComponen
 	
 	private final World world;
 	
+	private long age;
+	
 	public WorldGasComponent(World world) {
 		this.world = world;
+		this.age = 0;
 	}
 	
 	public World getWorld() {
 		return world;
 	}
-
-	public void scheduleRemoval(BlockPos pos) {
+	
+	public Set<BlockPos> getNodes() {
+		return nodes;
+	}
+	
+	public Set<BlockPos> getNodesToAdd() {
+		return nodesToAdd;
+	}
+	
+	public Set<BlockPos> getNodesToRemove() {
+		return nodesToRemove;
+	}
+	
+	public Map<PlayerEntity, Set<BlockPos>> getNodeParticles() {
+		return nodeParticles;
+	}
+	
+	public long getAge() {
+		return age;
+	}
+	
+	public void remove(BlockPos pos) {
 		nodesToRemove.add(pos);
 	}
 	
-	public void executeRemovals() {
+	private void executeRemovals() {
 		nodesToRemove.forEach(nodes::remove);
 		
 		nodesToRemove.clear();
 	}
 	
-	public void scheduleAddition(BlockPos pos) {
+	public void add(BlockPos pos) {
 		nodesToAdd.add(pos);
 	}
 	
-	public void executeAdditions() {
+	private void executeAdditions() {
 		nodesToAdd.forEach(nodes::add);
 		
 		nodesToAdd.clear();
 	}
 	
-	public void executeParticles() {
+	@Override
+	public void serverTick() {
+		if (world == null)
+			return;
+		
+		++age;
+		
+		if (age % 20 != 0)
+			return;
+		
 		Object2BooleanMap<PlayerEntity> playersNearGasClouds = new Object2BooleanArrayMap<>();
 		
 		for (PlayerEntity player : world.getPlayers()) {
@@ -97,8 +127,21 @@ public final class WorldGasComponent implements Component, ServerTickingComponen
 		}
 		
 		for (BlockPos pos : nodes) {
+			for (Direction direction : DirectionUtilities.DIRECTIONS) {
+				BlockPos sidePos = pos.offset(direction);
+				
+				if (!nodes.contains(sidePos) && sidePos.isWithinDistance(((ServerWorld) world).getSpawnPos(), 128) && sidePos.getY() < world.getTopPosition(Heightmap.Type.WORLD_SURFACE, sidePos).getY() + 3) {
+					BlockState sideState = world.getBlockState(sidePos);
+					BlockState centerState = world.getBlockState(pos);
+					
+					if (WorldUtilities.isTraversableForPropagation(world, centerState, pos, sideState, sidePos, direction)) {
+						add(sidePos);
+					}
+				}
+			}
+			
 			for (PlayerEntity player : world.getPlayers()) {
-				if (player.squaredDistanceTo(pos.getX(), pos.getY(), pos.getZ()) < 8 * 8) {
+				if (player.squaredDistanceTo(pos.getX(), pos.getY(), pos.getZ()) < 4 * 4) {
 					playersNearGasClouds.put(player, true);
 				}
 				
@@ -127,46 +170,11 @@ public final class WorldGasComponent implements Component, ServerTickingComponen
 			
 			ServerPlayNetworking.send((ServerPlayerEntity) player, HarmfulGasNetworking.NEAR_GAS_CLOUD, buf);
 		}
-	}
-	
-	public boolean isTraversableForPropagation(BlockState centerState, BlockPos centerPos, BlockState sideState, BlockPos sidePos, Direction direction) {
-		if (world == null) return false;
-		
-		return sideState.getFluidState().isEmpty() &&
-				!(Registry.BLOCK.getId(sideState.getBlock()).toString().equals("astromine:airlock") && !sideState.get(Properties.POWERED))
-				&& (sideState.isAir() || !sideState.isSideSolidFullSquare(world, sidePos, direction.getOpposite()))
-				&& (centerState.isAir() || !centerState.isSideSolidFullSquare(world, centerPos, direction)
-				&& (!sideState.isOpaqueFullCube(world, centerPos)));
-	}
-	
-	@Override
-	public void serverTick() {
-		if (world == null)
-			return;
-		
-		for (BlockPos centerPos : nodes) {
-			for (Direction direction : new Direction[]{Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST, Direction.DOWN, Direction.UP}) {
-				BlockPos sidePos = centerPos.offset(direction);
-				
-				if (sidePos.isWithinDistance(((ServerWorld) world).getSpawnPos(), 128) && !nodes.contains(sidePos) && sidePos.getY() < world.getTopPosition(Heightmap.Type.WORLD_SURFACE, sidePos).getY() + 2) {
-					BlockState sideState = world.getBlockState(sidePos);
-					BlockState centerState = world.getBlockState(centerPos);
-					
-					if (isTraversableForPropagation(centerState, centerPos, sideState, sidePos, direction)) {
-						scheduleAddition(sidePos);
-					}
-				}
-			}
-		}
 		
 		executeAdditions();
 		executeRemovals();
-		executeParticles();
 	}
-	
-	/**
-	 * Serializes this {@link WorldGasComponent} to a {@link CompoundTag}.
-	 */
+
 	@Override
 	public void writeToNbt(CompoundTag tag) {
 		if (world == null)
@@ -187,9 +195,6 @@ public final class WorldGasComponent implements Component, ServerTickingComponen
 		tag.put("data", dataTag);
 	}
 	
-	/**
-	 * Deserializes this {@link WorldGasComponent} from a {@link CompoundTag}.
-	 */
 	@Override
 	public void readFromNbt(CompoundTag tag) {
 		if (world == null)
@@ -204,9 +209,6 @@ public final class WorldGasComponent implements Component, ServerTickingComponen
 		}
 	}
 	
-	/**
-	 * Returns the {@link WorldGasComponent} of the given {@link V}.
-	 */
 	@Nullable
 	public static <V> WorldGasComponent get(V v) {
 		try {

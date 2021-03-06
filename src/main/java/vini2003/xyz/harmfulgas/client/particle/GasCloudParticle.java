@@ -33,8 +33,8 @@ public class GasCloudParticle extends SpriteBillboardParticle {
 		public Particle createParticle(DefaultParticleType parameters, ClientWorld world, double x, double y, double z, double velocityX, double velocityY, double velocityZ) {
 			GasCloudParticle gasCloudParticle = new GasCloudParticle(world, x, y, z);
 			gasCloudParticle.setSprite(spriteProvider);
-			gasCloudParticle.scale = 8F;
-			gasCloudParticle.colorAlpha = 0.20F;
+			gasCloudParticle.scale = 4F;
+			gasCloudParticle.colorAlpha = 0.05F;
 			return gasCloudParticle;
 		}
 	}
