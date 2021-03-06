@@ -7,17 +7,17 @@ import dev.onyxstudios.cca.api.v3.component.ComponentRegistry;
 import dev.onyxstudios.cca.api.v3.world.WorldComponentFactoryRegistry;
 import dev.onyxstudios.cca.api.v3.world.WorldComponentInitializer;
 import vini2003.xyz.harmfulgas.HarmfulGas;
-import vini2003.xyz.harmfulgas.common.component.ChunkAtmosphereComponent;
+import vini2003.xyz.harmfulgas.common.component.WorldGasComponent;
 
-public class HarmfulGasComponents implements ChunkComponentInitializer {
-	public static final ComponentKey<ChunkAtmosphereComponent> CHUNK_ATMOSPHERE_COMPONENT = ComponentRegistry.getOrCreate(HarmfulGas.identifier("chunk_atmosphere_component"), ChunkAtmosphereComponent.class);
+public class HarmfulGasComponents implements WorldComponentInitializer {
+	public static final ComponentKey<WorldGasComponent> WORLD_GAS_COMPONENT = ComponentRegistry.getOrCreate(HarmfulGas.identifier("world_gas_component"), WorldGasComponent.class);
 	
 	public static void initialize() {
 	
 	}
 	
 	@Override
-	public void registerChunkComponentFactories(ChunkComponentFactoryRegistry registry) {
-		registry.register(CHUNK_ATMOSPHERE_COMPONENT, ChunkAtmosphereComponent::new);
+	public void registerWorldComponentFactories(WorldComponentFactoryRegistry worldComponentFactoryRegistry) {
+		worldComponentFactoryRegistry.register(WORLD_GAS_COMPONENT, WorldGasComponent::new);
 	}
 }

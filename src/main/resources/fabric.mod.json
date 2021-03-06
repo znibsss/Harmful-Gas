@@ -34,7 +34,7 @@
   },
   "custom": {
     "cardinal-components": [
-      "harmfulgas:chunk_atmosphere_component"
+      "harmfulgas:world_gas_component"
     ]
   }
 }
