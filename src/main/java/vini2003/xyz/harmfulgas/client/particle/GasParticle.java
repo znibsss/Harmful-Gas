@@ -19,13 +19,6 @@ public class GasParticle extends SpriteBillboardParticle {
 	}
 	
 	@Override
-	public void buildGeometry(VertexConsumer vertexConsumer, Camera camera, float tickDelta) {
-		if (true) {
-			super.buildGeometry(vertexConsumer, camera, tickDelta);
-		}
-	}
-	
-	@Override
 	public ParticleTextureSheet getType() {
 		return HarmfulGasTextureSheets.GAS;
 	}
@@ -43,7 +36,7 @@ public class GasParticle extends SpriteBillboardParticle {
 			GasParticle gasParticle = new GasParticle(world, x, y, z);
 			gasParticle.setSprite(spriteProvider);
 			gasParticle.scale = 8F;
-			gasParticle.colorAlpha = 0.125F;
+			gasParticle.colorAlpha = 0.20F;
 			return gasParticle;
 		}
 	}

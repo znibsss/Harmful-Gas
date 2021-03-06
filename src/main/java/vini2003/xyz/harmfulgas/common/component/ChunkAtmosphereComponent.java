@@ -38,6 +38,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
@@ -75,6 +76,8 @@ public final class ChunkAtmosphereComponent implements Component, ServerTickingC
 	
 	private final Chunk chunk;
 	
+	private static volatile int totalVolumesAdded = 0;
+	
 	public ChunkAtmosphereComponent(Chunk chunk) {
 		if (chunk instanceof WorldChunk) {
 			this.world = ((WorldChunk) chunk).getWorld();
@@ -83,6 +86,10 @@ public final class ChunkAtmosphereComponent implements Component, ServerTickingC
 			this.world = null;
 			this.chunk = null;
 		}
+	}
+	
+	public static void resetTotalVolumesAdded() {
+		totalVolumesAdded = 0;
 	}
 	
 	public World getWorld() {
@@ -126,7 +133,7 @@ public final class ChunkAtmosphereComponent implements Component, ServerTickingC
 	
 	public void executeParticles() {
 		volumes.forEach(pos -> {
-			if (pos.getX() % 4 == 0 && pos.getZ() % 4 == 0) {
+			if (pos.getX() % 3 == 0 && pos.getZ() % 3 == 0) {
 				for (PlayerEntity player : world.getPlayers()) {
 					particleTimes.putIfAbsent(player, new Object2IntArrayMap<>());
 					
@@ -196,23 +203,22 @@ public final class ChunkAtmosphereComponent implements Component, ServerTickingC
 		if (world == null)
 			return;
 		
+		if (totalVolumesAdded >= 5) {
+			return;
+		}
+		
 		if ((world.isChunkLoaded(chunk.getPos().x, chunk.getPos().z))) {
-			main:
 			for (BlockPos centerPos : volumes) {
-				for (Direction direction : new Direction[]{Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST, Direction.DOWN}) {
+				for (Direction direction : new Direction[]{Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST, Direction.DOWN, Direction.UP}) {
 					BlockPos sidePos = centerPos.offset(direction);
 					
-					if (!volumes.contains(sidePos) && sidePos.getY() < 81) {
+					if (sidePos.isWithinDistance(((ServerWorld) world).getSpawnPos(), 160) && !volumes.contains(sidePos) && sidePos.getY() < world.getTopPosition(Heightmap.Type.WORLD_SURFACE, sidePos).getY() + 2) {
 						if (isInChunk(sidePos)) {
 							BlockState sideState = world.getBlockState(sidePos);
 							BlockState centerState = world.getBlockState(centerPos);
 							
 							if (isTraversableForPropagation(centerState, centerPos, sideState, sidePos, direction)) {
 								scheduleAddition(sidePos);
-								
-								if (direction == Direction.WEST) {
-									break;
-								}
 							}
 						} else {
 							ChunkPos neighborPos = getNeighborFromPos(sidePos);
@@ -222,12 +228,8 @@ public final class ChunkAtmosphereComponent implements Component, ServerTickingC
 							BlockState sideState = world.getBlockState(sidePos);
 							BlockState centerState = world.getBlockState(centerPos);
 							
-							if (isTraversableForPropagation(centerState, centerPos, sideState, sidePos, direction)) {
+							if (!chunkAtmosphereComponent.volumes.contains(sidePos) && isTraversableForPropagation(centerState, centerPos, sideState, sidePos, direction)) {
 								chunkAtmosphereComponent.scheduleAddition(sidePos);
-								
-								if (direction == Direction.WEST) {
-									break;
-								}
 							}
 						}
 					}
