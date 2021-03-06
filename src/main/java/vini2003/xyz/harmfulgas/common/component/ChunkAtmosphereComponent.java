@@ -197,11 +197,12 @@ public final class ChunkAtmosphereComponent implements Component, ServerTickingC
 			return;
 		
 		if ((world.isChunkLoaded(chunk.getPos().x, chunk.getPos().z))) {
+			main:
 			for (BlockPos centerPos : volumes) {
 				for (Direction direction : new Direction[]{Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST, Direction.DOWN}) {
 					BlockPos sidePos = centerPos.offset(direction);
 					
-					if (!volumes.contains(sidePos) && sidePos.getY() < world.getTopPosition(Heightmap.Type.MOTION_BLOCKING, sidePos).getY() + 2) {
+					if (!volumes.contains(sidePos) && sidePos.getY() < 81) {
 						if (isInChunk(sidePos)) {
 							BlockState sideState = world.getBlockState(sidePos);
 							BlockState centerState = world.getBlockState(centerPos);

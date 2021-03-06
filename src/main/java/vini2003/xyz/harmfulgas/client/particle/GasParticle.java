@@ -20,7 +20,7 @@ public class GasParticle extends SpriteBillboardParticle {
 	
 	@Override
 	public void buildGeometry(VertexConsumer vertexConsumer, Camera camera, float tickDelta) {
-		if (SHOW) {
+		if (true) {
 			super.buildGeometry(vertexConsumer, camera, tickDelta);
 		}
 	}

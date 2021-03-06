@@ -3,6 +3,7 @@ package vini2003.xyz.harmfulgas;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import vini2003.xyz.harmfulgas.registry.client.HarmfulGasCallbacks;
 import vini2003.xyz.harmfulgas.registry.client.HarmfulGasNetworking;
 import vini2003.xyz.harmfulgas.registry.client.HarmfulGasParticleFactories;
 import vini2003.xyz.harmfulgas.registry.client.HarmfulGasParticleTypes;
@@ -11,6 +12,7 @@ import vini2003.xyz.harmfulgas.registry.client.HarmfulGasParticleTypes;
 public class HarmfulGasClient implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
+		HarmfulGasCallbacks.initialize();
 		HarmfulGasParticleTypes.initialize();
 		HarmfulGasParticleFactories.initialize();
 		HarmfulGasNetworking.initialize();
