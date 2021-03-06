@@ -1,6 +1,8 @@
 package vini2003.xyz.harmfulgas.client.particle;
 
 import net.minecraft.client.particle.*;
+import net.minecraft.client.render.Camera;
+import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.particle.DefaultParticleType;
 import org.jetbrains.annotations.Nullable;
@@ -13,7 +15,12 @@ public class GasCloudParticle extends SpriteBillboardParticle {
 	
 	public GasCloudParticle(ClientWorld clientWorld, double x, double y, double z) {
 		super(clientWorld, x, y, z);
-		maxAge = Integer.MAX_VALUE;
+	}
+	
+	@Override
+	public void buildGeometry(VertexConsumer vertexConsumer, Camera camera, float tickDelta) {
+		this.angle += tickDelta * 10F;
+		super.buildGeometry(vertexConsumer, camera, tickDelta);
 	}
 	
 	@Override
@@ -33,8 +40,9 @@ public class GasCloudParticle extends SpriteBillboardParticle {
 		public Particle createParticle(DefaultParticleType parameters, ClientWorld world, double x, double y, double z, double velocityX, double velocityY, double velocityZ) {
 			GasCloudParticle gasCloudParticle = new GasCloudParticle(world, x, y, z);
 			gasCloudParticle.setSprite(spriteProvider);
+			gasCloudParticle.maxAge = Integer.MAX_VALUE;
 			gasCloudParticle.scale = 4F;
-			gasCloudParticle.colorAlpha = 0.05F;
+			gasCloudParticle.colorAlpha = 0.25F;
 			return gasCloudParticle;
 		}
 	}

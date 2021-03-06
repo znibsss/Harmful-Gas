@@ -28,6 +28,7 @@ import it.unimi.dsi.fastutil.objects.Object2BooleanArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.BlockState;
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.PacketByteBuf;
@@ -48,10 +49,9 @@ import vini2003.xyz.harmfulgas.registry.common.HarmfulGasComponents;
 
 import java.util.*;
 
-import static net.minecraft.util.math.MathHelper.clamp;
-
 public final class WorldGasComponent implements Component, ServerTickingComponent {
 	private final Set<BlockPos> nodes = new HashSet<>();
+	private final List<BlockPos> nodesIndexed = new ArrayList<>();
 	private final Set<BlockPos> nodesToAdd = new HashSet<>();
 	private final Set<BlockPos> nodesToRemove = new HashSet<>();
 	
@@ -61,9 +61,12 @@ public final class WorldGasComponent implements Component, ServerTickingComponen
 	
 	private long age;
 	
+	private int tick;
+	
 	public WorldGasComponent(World world) {
 		this.world = world;
 		this.age = 0;
+		this.tick = 0;
 	}
 	
 	public World getWorld() {
@@ -96,6 +99,7 @@ public final class WorldGasComponent implements Component, ServerTickingComponen
 	
 	private void executeRemovals() {
 		nodesToRemove.forEach(nodes::remove);
+		nodesToRemove.forEach(nodesIndexed::remove);
 		
 		nodesToRemove.clear();
 	}
@@ -106,6 +110,7 @@ public final class WorldGasComponent implements Component, ServerTickingComponen
 	
 	private void executeAdditions() {
 		nodesToAdd.forEach(nodes::add);
+		nodesToAdd.forEach(nodesIndexed::add);
 		
 		nodesToAdd.clear();
 	}
@@ -117,20 +122,17 @@ public final class WorldGasComponent implements Component, ServerTickingComponen
 		
 		++age;
 		
-		if (age % 20 != 0)
-			return;
+		int start = nodesIndexed.size() / 20 * tick;
 		
-		Object2BooleanMap<PlayerEntity> playersNearGasClouds = new Object2BooleanArrayMap<>();
+		int end = Math.min(Math.max(256, start + nodesIndexed.size() / 20), nodesIndexed.size());
 		
-		for (PlayerEntity player : world.getPlayers()) {
-			playersNearGasClouds.put(player, false);
-		}
-		
-		for (BlockPos pos : nodes) {
+		for (int i = start; i < end; ++i) {
+			BlockPos pos = nodesIndexed.get(i);
+			
 			for (Direction direction : DirectionUtilities.DIRECTIONS) {
 				BlockPos sidePos = pos.offset(direction);
 				
-				if (!nodes.contains(sidePos) && sidePos.isWithinDistance(((ServerWorld) world).getSpawnPos(), 128) && sidePos.getY() < world.getTopPosition(Heightmap.Type.WORLD_SURFACE, sidePos).getY() + 3) {
+				if (!nodes.contains(sidePos) && sidePos.isWithinDistance(((ServerWorld) world).getSpawnPos(), 192) && sidePos.getY() < world.getTopPosition(Heightmap.Type.WORLD_SURFACE, sidePos).getY() + 3) {
 					BlockState sideState = world.getBlockState(sidePos);
 					BlockState centerState = world.getBlockState(pos);
 					
@@ -141,8 +143,10 @@ public final class WorldGasComponent implements Component, ServerTickingComponen
 			}
 			
 			for (PlayerEntity player : world.getPlayers()) {
-				if (player.squaredDistanceTo(pos.getX(), pos.getY(), pos.getZ()) < 4 * 4) {
-					playersNearGasClouds.put(player, true);
+				double distance = player.squaredDistanceTo(pos.getX(), pos.getY(), pos.getZ());
+				
+				if (distance < 4.0D * 4.0D) {
+					player.damage(DamageSource.DROWN, 1.0F);
 				}
 				
 				if (pos.getX() % 3 == 0 && pos.getZ() % 3 == 0) {
@@ -163,16 +167,14 @@ public final class WorldGasComponent implements Component, ServerTickingComponen
 			}
 		}
 		
-		for (PlayerEntity player : world.getPlayers()) {
-			PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
-			
-			buf.writeBoolean(playersNearGasClouds.getBoolean(player));
-			
-			ServerPlayNetworking.send((ServerPlayerEntity) player, HarmfulGasNetworking.NEAR_GAS_CLOUD, buf);
-		}
-		
 		executeAdditions();
 		executeRemovals();
+		
+		++tick;
+		
+		if (tick == 20) {
+			tick = 0;
+		}
 	}
 
 	@Override
@@ -205,7 +207,7 @@ public final class WorldGasComponent implements Component, ServerTickingComponen
 		for (String key : dataTag.getKeys()) {
 			CompoundTag pointTag = dataTag.getCompound(key);
 			
-			nodes.add(BlockPos.fromLong(pointTag.getLong("pos")));
+			add(BlockPos.fromLong(pointTag.getLong("pos")));
 		}
 	}
 	

@@ -15,7 +15,6 @@ public class HarmfulGasClient implements ClientModInitializer {
 		HarmfulGasParticleTypes.initialize();
 		HarmfulGasParticleFactories.initialize();
 		HarmfulGasNetworking.initialize();
-		HarmfulGasShaders.initialize();
 		HarmfulGasTextureSheets.initialize();
 	}
 }
