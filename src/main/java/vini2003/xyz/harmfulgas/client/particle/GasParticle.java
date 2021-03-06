@@ -1,15 +1,28 @@
 package vini2003.xyz.harmfulgas.client.particle;
 
 import net.minecraft.client.particle.*;
+import net.minecraft.client.render.Camera;
+import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.particle.DefaultParticleType;
 import org.jetbrains.annotations.Nullable;
 import vini2003.xyz.harmfulgas.registry.client.HarmfulGasTextureSheets;
 
 public class GasParticle extends SpriteBillboardParticle {
+	public static boolean SHOW = false;
+	
+	public static boolean DRAW_PARTICLES = false;
+	
 	public GasParticle(ClientWorld clientWorld, double x, double y, double z) {
 		super(clientWorld, x, y, z);
-		maxAge = Integer.MAX_VALUE;
+		maxAge = 600;
+	}
+	
+	@Override
+	public void buildGeometry(VertexConsumer vertexConsumer, Camera camera, float tickDelta) {
+		if (SHOW) {
+			super.buildGeometry(vertexConsumer, camera, tickDelta);
+		}
 	}
 	
 	@Override

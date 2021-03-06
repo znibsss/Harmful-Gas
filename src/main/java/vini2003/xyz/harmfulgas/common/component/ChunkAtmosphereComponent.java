@@ -33,6 +33,7 @@ import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.particle.ParticleTypes;
@@ -68,7 +69,7 @@ public final class ChunkAtmosphereComponent implements Component, ServerTickingC
 	private final Set<BlockPos> volumesToAdd = new HashSet<>();
 	private final Set<BlockPos> volumesToRemove = new HashSet<>();
 	
-	private final Object2IntMap<BlockPos> particleTimes = new Object2IntArrayMap<>();
+	private final Map<PlayerEntity, Object2IntMap<BlockPos>> particleTimes = new HashMap<>();
 	
 	private final World world;
 	
@@ -108,13 +109,7 @@ public final class ChunkAtmosphereComponent implements Component, ServerTickingC
 	}
 	
 	public void executeRemovals() {
-		volumesToRemove.forEach(pos -> {
-			volumes.remove(pos);
-			
-			world.getPlayers().forEach((player) -> {
-				ServerSidePacketRegistry.INSTANCE.sendToPlayer(player, ClientAtmosphereUtilities.GAS_REMOVED, ClientAtmosphereUtilities.ofGasRemoved(pos));
-			});
-		});
+		volumesToRemove.forEach(volumes::remove);
 		
 		volumesToRemove.clear();
 	}
@@ -124,13 +119,7 @@ public final class ChunkAtmosphereComponent implements Component, ServerTickingC
 	}
 	
 	public void executeAdditions() {
-		volumesToAdd.forEach(pos -> {
-			volumes.add(pos);
-			
-			world.getPlayers().forEach((player) -> {
-				ServerSidePacketRegistry.INSTANCE.sendToPlayer(player, ClientAtmosphereUtilities.GAS_ADDED, ClientAtmosphereUtilities.ofGasRemoved(pos));
-			});
-		});
+		volumesToAdd.forEach(volumes::add);
 		
 		volumesToAdd.clear();
 	}
@@ -138,25 +127,27 @@ public final class ChunkAtmosphereComponent implements Component, ServerTickingC
 	public void executeParticles() {
 		volumes.forEach(pos -> {
 			if (pos.getX() % 4 == 0 && pos.getZ() % 4 == 0) {
-				int time = particleTimes.containsKey(pos) ? clamp(particleTimes.getInt(pos) - 1, 0, 600) : 0;
-				
-				if (time == 0) {
-					world.getPlayers().forEach(player -> {
-						if (player.squaredDistanceTo(pos.getX(), pos.getY(), pos.getZ()) < 128 * 128) {
-							PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
-							
-							buf.writeInt(pos.getX());
-							buf.writeInt(pos.getY());
-							buf.writeInt(pos.getZ());
-							
-							ServerPlayNetworking.send((ServerPlayerEntity) player, HarmfulGasNetworking.PARTICLE_ADDED, buf);
-						}
-					});
+				for (PlayerEntity player : world.getPlayers()) {
+					particleTimes.putIfAbsent(player, new Object2IntArrayMap<>());
 					
-					time = 600;
+					int time = particleTimes.get(player).getOrDefault(pos, 0);
+					
+					if (time == 0) {
+						PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
+						
+						buf.writeInt(pos.getX());
+						buf.writeInt(pos.getY());
+						buf.writeInt(pos.getZ());
+						
+						ServerPlayNetworking.send((ServerPlayerEntity) player, HarmfulGasNetworking.PARTICLE_ADDED, buf);
+						
+						time = 600;
+					} else {
+						--time;
+					}
+					
+					particleTimes.get(player).put(pos, time);
 				}
-				
-				particleTimes.put(pos, time);
 			}
 		});
 	}
@@ -193,7 +184,8 @@ public final class ChunkAtmosphereComponent implements Component, ServerTickingC
 	public boolean isTraversableForPropagation(BlockState centerState, BlockPos centerPos, BlockState sideState, BlockPos sidePos, Direction direction) {
 		if (world == null) return false;
 		
-		return !(Registry.BLOCK.getId(sideState.getBlock()).toString().equals("astromine:airlock") && !sideState.get(Properties.POWERED))
+		return sideState.getFluidState().isEmpty() &&
+				!(Registry.BLOCK.getId(sideState.getBlock()).toString().equals("astromine:airlock") && !sideState.get(Properties.POWERED))
 				&& (sideState.isAir() || !sideState.isSideSolidFullSquare(world, sidePos, direction.getOpposite()))
 				&& (centerState.isAir() || !centerState.isSideSolidFullSquare(world, centerPos, direction)
 				&& (!sideState.isOpaqueFullCube(world, centerPos)));

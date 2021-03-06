@@ -4,7 +4,8 @@
   "package": "vini2003.xyz.harmfulgas.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "client.ParticleManagerMixin"
+    "client.ParticleManagerMixin",
+    "client.WorldRendererMixin"
   ],
   "client": [
     "client.InGameHudMixin"
