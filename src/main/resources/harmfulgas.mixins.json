@@ -6,8 +6,7 @@
   "mixins": [
   ],
   "client": [
-    "client.ParticleManagerMixin",
-    "client.InGameHudMixin"
+    "client.ParticleManagerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -29,4 +29,8 @@ public class HarmfulGasTextureSheets {
 			tessellator.draw();
 		}
 	};
+	
+	public static void initialize() {
+	
+	}
 }

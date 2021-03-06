@@ -25,6 +25,7 @@ package vini2003.xyz.harmfulgas.common.component;/*
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.objects.Object2BooleanArrayMap;
 
+import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
@@ -102,9 +103,19 @@ public final class ChunkAtmosphereComponent implements Component, ServerTickingC
 	}
 	
 	public void executeParticles() {
+		Object2BooleanMap<PlayerEntity> playersNearGasClouds = new Object2BooleanArrayMap<>();
+		
+		for (PlayerEntity player : world.getPlayers()) {
+			playersNearGasClouds.put(player, false);
+		}
+		
 		for (BlockPos pos : nodes) {
-			if (pos.getX() % 3 == 0 && pos.getZ() % 3 == 0) {
-				for (PlayerEntity player : world.getPlayers()) {
+			for (PlayerEntity player : world.getPlayers()) {
+				if (player.squaredDistanceTo(pos.getX(), pos.getY(), pos.getZ()) < 8 * 8) {
+					playersNearGasClouds.put(player, true);
+				}
+				
+				if (pos.getX() % 3 == 0 && pos.getZ() % 3 == 0) {
 					nodeParticles.putIfAbsent(player, new Object2BooleanArrayMap<>());
 					
 					if (!nodeParticles.get(player).getOrDefault(pos, false)) {
@@ -114,7 +125,7 @@ public final class ChunkAtmosphereComponent implements Component, ServerTickingC
 						buf.writeInt(pos.getY());
 						buf.writeInt(pos.getZ());
 						
-						ServerPlayNetworking.send((ServerPlayerEntity) player, HarmfulGasNetworking.PARTICLE_ADDED, buf);
+						ServerPlayNetworking.send((ServerPlayerEntity) player, HarmfulGasNetworking.ADD_GAS_CLOUD, buf);
 						
 						nodeParticles.get(player).put(pos, true);
 					} else {
@@ -122,6 +133,14 @@ public final class ChunkAtmosphereComponent implements Component, ServerTickingC
 					}
 				}
 			}
+		}
+		
+		for (PlayerEntity player : world.getPlayers()) {
+			PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
+			
+			buf.writeBoolean(playersNearGasClouds.getBoolean(player));
+			
+			ServerPlayNetworking.send((ServerPlayerEntity) player, HarmfulGasNetworking.NEAR_GAS_CLOUD, buf);
 		}
 	}
 	

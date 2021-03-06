@@ -14,7 +14,6 @@ public class HarmfulGas implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		HarmfulGasCommands.initialize();
-		HarmfulGasCallbacks.initialize();
 		HarmfulGasComponents.initialize();
 	}
 }

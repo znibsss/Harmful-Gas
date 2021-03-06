@@ -1,15 +1,22 @@
 package vini2003.xyz.harmfulgas.registry.client;
 
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
-import vini2003.xyz.harmfulgas.client.particle.GasParticle;
-import vini2003.xyz.harmfulgas.client.utilities.ClientUtilities;
+import vini2003.xyz.harmfulgas.HarmfulGasClient;
+
+import static net.minecraft.util.math.MathHelper.clamp;
 
 public class HarmfulGasCallbacks {
 	public static void initialize() {
-		WorldRenderEvents.AFTER_SETUP.register((context) -> {
-			GasParticle.DRAW_PARTICLES = true;
+		WorldRenderEvents.START.register((context) -> {
+			if (HarmfulGasClient.isNearGasCloud) {
+				HarmfulGasShaders.enableBlur = true;
+				
+				HarmfulGasShaders.blurModifierStrength = clamp(HarmfulGasShaders.blurModifierStrength * 0.99F, 0F, 1F);
+			} else {
+				HarmfulGasShaders.enableBlur = false;
+			}
 			
-			//ClientUtilities.getParticleManager().renderParticles(context.matrixStack(), null, context.lightmapTextureManager(), context.camera(), context.tickDelta());
+			HarmfulGasShaders.BLUR_SHADER.setUniformValue("ModifierStrength", HarmfulGasShaders.blurModifierStrength);
 		});
 	}
 }

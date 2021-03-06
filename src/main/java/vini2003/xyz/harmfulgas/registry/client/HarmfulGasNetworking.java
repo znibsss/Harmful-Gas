@@ -3,31 +3,19 @@
 	import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 	import net.minecraft.util.Identifier;
 	import vini2003.xyz.harmfulgas.HarmfulGas;
-	import vini2003.xyz.harmfulgas.client.utilities.ClientAtmosphereUtilities;
+	import vini2003.xyz.harmfulgas.HarmfulGasClient;
 	
 	public class HarmfulGasNetworking {
-		public static final Identifier PARTICLE_ADDED = HarmfulGas.identifier("particle_added");
+		public static final Identifier NEAR_GAS_CLOUD = HarmfulGas.identifier("near_gas_cloud");
+		
+		public static final Identifier ADD_GAS_CLOUD = HarmfulGas.identifier("add_gas_cloud");
 		
 		public static void initialize() {
-			ClientPlayNetworking.registerGlobalReceiver(ClientAtmosphereUtilities.GAS_ERASED, ((minecraftClient, clientPlayNetworkHandler, packetByteBuf, packetSender) -> {
-				packetByteBuf.retain();
-				
-				ClientAtmosphereUtilities.onGasErased(packetByteBuf);
+			ClientPlayNetworking.registerGlobalReceiver(NEAR_GAS_CLOUD, ((minecraftClient, clientPlayNetworkHandler, packetByteBuf, packetSender) -> {
+				HarmfulGasClient.isNearGasCloud = packetByteBuf.readBoolean();
 			}));
 			
-			ClientPlayNetworking.registerGlobalReceiver(ClientAtmosphereUtilities.GAS_ADDED, ((minecraftClient, clientPlayNetworkHandler, packetByteBuf, packetSender) -> {
-				packetByteBuf.retain();
-				
-				ClientAtmosphereUtilities.onGasAdded(packetByteBuf);
-			}));
-			
-			ClientPlayNetworking.registerGlobalReceiver(ClientAtmosphereUtilities.GAS_REMOVED, ((minecraftClient, clientPlayNetworkHandler, packetByteBuf, packetSender) -> {
-				packetByteBuf.retain();
-				
-				ClientAtmosphereUtilities.onGasRemoved(packetByteBuf);
-			}));
-			
-			ClientPlayNetworking.registerGlobalReceiver(PARTICLE_ADDED, ((minecraftClient, clientPlayNetworkHandler, packetByteBuf, packetSender) -> {
+			ClientPlayNetworking.registerGlobalReceiver(ADD_GAS_CLOUD, ((minecraftClient, clientPlayNetworkHandler, packetByteBuf, packetSender) -> {
 				minecraftClient.world.addParticle(HarmfulGasParticleTypes.GAS, packetByteBuf.readInt(), packetByteBuf.readInt(), packetByteBuf.readInt(), 0D, 0D, 0D);
 			}));
 		}

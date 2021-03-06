@@ -10,6 +10,8 @@
     uniform vec2 BlurDir;
     uniform float Radius;
 
+    uniform float ModifierStrength;
+
     void main() {
         vec4 blurred = vec4(0.0);
         float totalStrength = 0.0;
@@ -34,7 +36,7 @@
         tX = tX * 5;
         tY = tY * 5;
 
-        float modifier = (1 * 5) - (tX + tY);
+        float modifier = ((1 * 5) - (tX + tY)) * ModifierStrength;
 
         for(float r = -Radius; r <= Radius; r += 1.0) {
             vec4 sampleValue = texture2D(DiffuseSampler, texCoord + oneTexel * r * BlurDir * modifier);
