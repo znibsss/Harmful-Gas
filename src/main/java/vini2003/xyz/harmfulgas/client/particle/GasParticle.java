@@ -15,7 +15,7 @@ public class GasParticle extends SpriteBillboardParticle {
 	
 	public GasParticle(ClientWorld clientWorld, double x, double y, double z) {
 		super(clientWorld, x, y, z);
-		maxAge = 600;
+		maxAge = Integer.MAX_VALUE;
 	}
 	
 	@Override

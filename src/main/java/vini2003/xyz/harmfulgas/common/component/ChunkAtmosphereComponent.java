@@ -22,28 +22,20 @@ package vini2003.xyz.harmfulgas.common.component;/*
  * SOFTWARE.
  */
 
-import dev.onyxstudios.cca.api.v3.component.tick.ClientTickingComponent;
-import dev.onyxstudios.cca.api.v3.component.tick.CommonTickingComponent;
 import io.netty.buffer.Unpooled;
-import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
-import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
+import it.unimi.dsi.fastutil.objects.Object2BooleanArrayMap;
 
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.Heightmap;
 import net.minecraft.world.World;
@@ -53,30 +45,23 @@ import dev.onyxstudios.cca.api.v3.component.Component;
 import dev.onyxstudios.cca.api.v3.component.tick.ServerTickingComponent;
 import org.jetbrains.annotations.Nullable;
 
-import com.google.common.collect.Lists;
-import vini2003.xyz.harmfulgas.HarmfulGas;
-import vini2003.xyz.harmfulgas.client.utilities.ClientAtmosphereUtilities;
 import vini2003.xyz.harmfulgas.registry.client.HarmfulGasNetworking;
-import vini2003.xyz.harmfulgas.registry.client.HarmfulGasParticleTypes;
 import vini2003.xyz.harmfulgas.registry.common.HarmfulGasComponents;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 import static net.minecraft.util.math.MathHelper.clamp;
 
 public final class ChunkAtmosphereComponent implements Component, ServerTickingComponent {
-	private final Set<BlockPos> volumes = new HashSet<>();
-	private final Set<BlockPos> volumesToAdd = new HashSet<>();
-	private final Set<BlockPos> volumesToRemove = new HashSet<>();
+	private final Set<BlockPos> nodes = new HashSet<>();
+	private final Set<BlockPos> nodesToAdd = new HashSet<>();
+	private final Set<BlockPos> nodesToRemove = new HashSet<>();
 	
-	private final Map<PlayerEntity, Object2IntMap<BlockPos>> particleTimes = new HashMap<>();
+	private final Map<PlayerEntity, Object2BooleanArrayMap<BlockPos>> nodeParticles = new HashMap<>();
 	
 	private final World world;
 	
 	private final Chunk chunk;
-	
-	private static volatile int totalVolumesAdded = 0;
 	
 	public ChunkAtmosphereComponent(Chunk chunk) {
 		if (chunk instanceof WorldChunk) {
@@ -88,10 +73,6 @@ public final class ChunkAtmosphereComponent implements Component, ServerTickingC
 		}
 	}
 	
-	public static void resetTotalVolumesAdded() {
-		totalVolumesAdded = 0;
-	}
-	
 	public World getWorld() {
 		return world;
 	}
@@ -100,46 +81,33 @@ public final class ChunkAtmosphereComponent implements Component, ServerTickingC
 		return chunk;
 	}
 	
-	public Set<BlockPos> getVolumes() {
-		return volumes;
-	}
-	
-	public boolean get(BlockPos position) {
-		if (world == null)
-			return false;
-		
-		return volumes.contains(position);
-	}
-	
 	public void scheduleRemoval(BlockPos pos) {
-		volumesToRemove.add(pos);
+		nodesToRemove.add(pos);
 	}
 	
 	public void executeRemovals() {
-		volumesToRemove.forEach(volumes::remove);
+		nodesToRemove.forEach(nodes::remove);
 		
-		volumesToRemove.clear();
+		nodesToRemove.clear();
 	}
 	
 	public void scheduleAddition(BlockPos pos) {
-		volumesToAdd.add(pos);
+		nodesToAdd.add(pos);
 	}
 	
 	public void executeAdditions() {
-		volumesToAdd.forEach(volumes::add);
+		nodesToAdd.forEach(nodes::add);
 		
-		volumesToAdd.clear();
+		nodesToAdd.clear();
 	}
 	
 	public void executeParticles() {
-		volumes.forEach(pos -> {
+		for (BlockPos pos : nodes) {
 			if (pos.getX() % 3 == 0 && pos.getZ() % 3 == 0) {
 				for (PlayerEntity player : world.getPlayers()) {
-					particleTimes.putIfAbsent(player, new Object2IntArrayMap<>());
+					nodeParticles.putIfAbsent(player, new Object2BooleanArrayMap<>());
 					
-					int time = particleTimes.get(player).getOrDefault(pos, 0);
-					
-					if (time == 0) {
+					if (!nodeParticles.get(player).getOrDefault(pos, false)) {
 						PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
 						
 						buf.writeInt(pos.getX());
@@ -148,15 +116,13 @@ public final class ChunkAtmosphereComponent implements Component, ServerTickingC
 						
 						ServerPlayNetworking.send((ServerPlayerEntity) player, HarmfulGasNetworking.PARTICLE_ADDED, buf);
 						
-						time = 600;
+						nodeParticles.get(player).put(pos, true);
 					} else {
-						--time;
+						nodeParticles.get(player).put(pos, false);
 					}
-					
-					particleTimes.get(player).put(pos, time);
 				}
 			}
-		});
+		}
 	}
 	
 	public static boolean isInChunk(ChunkPos chunkPos, BlockPos pos) {
@@ -203,16 +169,12 @@ public final class ChunkAtmosphereComponent implements Component, ServerTickingC
 		if (world == null)
 			return;
 		
-		if (totalVolumesAdded >= 5) {
-			return;
-		}
-		
 		if ((world.isChunkLoaded(chunk.getPos().x, chunk.getPos().z))) {
-			for (BlockPos centerPos : volumes) {
+			for (BlockPos centerPos : nodes) {
 				for (Direction direction : new Direction[]{Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST, Direction.DOWN, Direction.UP}) {
 					BlockPos sidePos = centerPos.offset(direction);
 					
-					if (sidePos.isWithinDistance(((ServerWorld) world).getSpawnPos(), 160) && !volumes.contains(sidePos) && sidePos.getY() < world.getTopPosition(Heightmap.Type.WORLD_SURFACE, sidePos).getY() + 2) {
+					if (sidePos.isWithinDistance(((ServerWorld) world).getSpawnPos(), 160) && !nodes.contains(sidePos) && sidePos.getY() < world.getTopPosition(Heightmap.Type.WORLD_SURFACE, sidePos).getY() + 2) {
 						if (isInChunk(sidePos)) {
 							BlockState sideState = world.getBlockState(sidePos);
 							BlockState centerState = world.getBlockState(centerPos);
@@ -228,7 +190,7 @@ public final class ChunkAtmosphereComponent implements Component, ServerTickingC
 							BlockState sideState = world.getBlockState(sidePos);
 							BlockState centerState = world.getBlockState(centerPos);
 							
-							if (!chunkAtmosphereComponent.volumes.contains(sidePos) && isTraversableForPropagation(centerState, centerPos, sideState, sidePos, direction)) {
+							if (!chunkAtmosphereComponent.nodes.contains(sidePos) && isTraversableForPropagation(centerState, centerPos, sideState, sidePos, direction)) {
 								chunkAtmosphereComponent.scheduleAddition(sidePos);
 							}
 						}
@@ -254,7 +216,7 @@ public final class ChunkAtmosphereComponent implements Component, ServerTickingC
 		
 		int i = 0;
 		
-		for (BlockPos pos : volumes) {
+		for (BlockPos pos : nodes) {
 			CompoundTag pointTag = new CompoundTag();
 			pointTag.putLong("pos", pos.asLong());
 			
@@ -278,7 +240,7 @@ public final class ChunkAtmosphereComponent implements Component, ServerTickingC
 		for (String key : dataTag.getKeys()) {
 			CompoundTag pointTag = dataTag.getCompound(key);
 			
-			volumes.add(BlockPos.fromLong(pointTag.getLong("pos")));
+			nodes.add(BlockPos.fromLong(pointTag.getLong("pos")));
 		}
 	}
 	
