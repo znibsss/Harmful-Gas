@@ -132,7 +132,7 @@ public final class WorldGasComponent implements Component, ServerTickingComponen
 			for (Direction direction : DirectionUtilities.DIRECTIONS) {
 				BlockPos sidePos = pos.offset(direction);
 				
-				if (!nodes.contains(sidePos) && sidePos.isWithinDistance(((ServerWorld) world).getSpawnPos(), 192) && sidePos.getY() < world.getTopPosition(Heightmap.Type.WORLD_SURFACE, sidePos).getY() + 3) {
+				if (!nodes.contains(sidePos) && sidePos.isWithinDistance(((ServerWorld) world).getSpawnPos(), 192) && sidePos.getY() < world.getTopPosition(Heightmap.Type.WORLD_SURFACE, sidePos).getY() + 2) {
 					BlockState sideState = world.getBlockState(sidePos);
 					BlockState centerState = world.getBlockState(pos);
 					

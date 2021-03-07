@@ -24,7 +24,7 @@ public class ParticleManagerMixin {
 	
 	@Redirect(at = @At(value = "INVOKE", target = "Lcom/google/common/collect/EvictingQueue;create(I)Lcom/google/common/collect/EvictingQueue;"), method = "method_18125")
 	private static <E> EvictingQueue<E> harmfulgas_tick(int maxSize) {
-		return EvictingQueue.create(65535);
+		return EvictingQueue.create(131072);
 	}
 	
 	static {

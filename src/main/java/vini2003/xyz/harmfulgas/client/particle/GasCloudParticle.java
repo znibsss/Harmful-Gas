@@ -6,21 +6,30 @@ import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.particle.DefaultParticleType;
 import org.jetbrains.annotations.Nullable;
+import vini2003.xyz.harmfulgas.client.utilities.ClientUtilities;
 import vini2003.xyz.harmfulgas.registry.client.HarmfulGasTextureSheets;
 
+import static vini2003.xyz.harmfulgas.HarmfulGasClient.rotatedVertices;
+
 public class GasCloudParticle extends SpriteBillboardParticle {
-	public static boolean SHOW = false;
-	
-	public static boolean DRAW_PARTICLES = false;
-	
 	public GasCloudParticle(ClientWorld clientWorld, double x, double y, double z) {
 		super(clientWorld, x, y, z);
 	}
 	
 	@Override
 	public void buildGeometry(VertexConsumer vertexConsumer, Camera camera, float tickDelta) {
-		this.angle += tickDelta * 10F;
-		super.buildGeometry(vertexConsumer, camera, tickDelta);
+		if (ClientUtilities.getPlayer().squaredDistanceTo(x, y, z) > 192.0D * 192.0D) {
+			return;
+		}
+		
+		float cX = (float) (this.x - camera.getPos().getX());
+		float cY = (float) (this.y - camera.getPos().getY());
+		float cZ = (float) (this.z - camera.getPos().getZ());
+		
+		vertexConsumer.vertex(rotatedVertices[0].getX() + cX, rotatedVertices[0].getY() + cY, rotatedVertices[0].getZ() + cZ).texture(getMaxU(), getMaxV()).color(this.colorRed, this.colorGreen, this.colorBlue, this.colorAlpha).light(15728880).next();
+		vertexConsumer.vertex(rotatedVertices[1].getX() + cX, rotatedVertices[1].getY() + cY, rotatedVertices[1].getZ() + cZ).texture(getMaxU(), getMinV()).color(this.colorRed, this.colorGreen, this.colorBlue, this.colorAlpha).light(15728880).next();
+		vertexConsumer.vertex(rotatedVertices[2].getX() + cX, rotatedVertices[2].getY() + cY, rotatedVertices[2].getZ() + cZ).texture(getMinU(), getMinV()).color(this.colorRed, this.colorGreen, this.colorBlue, this.colorAlpha).light(15728880).next();
+		vertexConsumer.vertex(rotatedVertices[3].getX() + cX, rotatedVertices[3].getY() + cY, rotatedVertices[3].getZ() + cZ).texture(getMinU(), getMaxV()).color(this.colorRed, this.colorGreen, this.colorBlue, this.colorAlpha).light(15728880).next();
 	}
 	
 	@Override
@@ -39,10 +48,11 @@ public class GasCloudParticle extends SpriteBillboardParticle {
 		@Override
 		public Particle createParticle(DefaultParticleType parameters, ClientWorld world, double x, double y, double z, double velocityX, double velocityY, double velocityZ) {
 			GasCloudParticle gasCloudParticle = new GasCloudParticle(world, x, y, z);
-			gasCloudParticle.setSprite(spriteProvider);
+			gasCloudParticle.sprite = spriteProvider.getSprite(gasCloudParticle.random);
 			gasCloudParticle.maxAge = Integer.MAX_VALUE;
 			gasCloudParticle.scale = 4F;
 			gasCloudParticle.colorAlpha = 0.25F;
+			
 			return gasCloudParticle;
 		}
 	}
