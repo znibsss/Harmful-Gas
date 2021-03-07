@@ -48,6 +48,7 @@ import vini2003.xyz.harmfulgas.registry.client.HarmfulGasNetworking;
 import vini2003.xyz.harmfulgas.registry.common.HarmfulGasComponents;
 
 import java.util.*;
+import java.util.function.ToDoubleFunction;
 
 public final class WorldGasComponent implements Component, ServerTickingComponent {
 	private final Set<BlockPos> nodes = new HashSet<>();
@@ -129,10 +130,30 @@ public final class WorldGasComponent implements Component, ServerTickingComponen
 		for (int i = start; i < end; ++i) {
 			BlockPos pos = nodesIndexed.get(i);
 			
+			double posDist = Integer.MAX_VALUE;
+			
+			for (PlayerEntity player : world.getPlayers()) {
+				double newPosDist = player.squaredDistanceTo(pos.getX(), pos.getY(), pos.getZ());
+				
+				if (newPosDist < posDist) {
+					posDist = newPosDist;
+				}
+			}
+			
 			for (Direction direction : DirectionUtilities.DIRECTIONS) {
 				BlockPos sidePos = pos.offset(direction);
 				
-				if (!nodes.contains(sidePos) && sidePos.isWithinDistance(((ServerWorld) world).getSpawnPos(), 192) && sidePos.getY() < world.getTopPosition(Heightmap.Type.WORLD_SURFACE, sidePos).getY() + 2) {
+				double sidePosDist = Integer.MAX_VALUE;
+				
+				for (PlayerEntity player : world.getPlayers()) {
+					double newSidePosDist = player.squaredDistanceTo(sidePos.getX(), sidePos.getY(), sidePos.getZ());
+					
+					if (newSidePosDist < sidePosDist) {
+						sidePosDist = newSidePosDist;
+					}
+				}
+				
+				if (!nodes.contains(sidePos) && (sidePosDist < posDist || sidePos.isWithinDistance(((ServerWorld) world).getSpawnPos(), 8F + age / 562.0F)) && sidePos.getY() < world.getTopPosition(Heightmap.Type.WORLD_SURFACE, sidePos).getY() + 2) {
 					BlockState sideState = world.getBlockState(sidePos);
 					BlockState centerState = world.getBlockState(pos);
 					
