@@ -18,7 +18,6 @@ public class HarmfulGasTextureSheets {
 		public void begin(BufferBuilder bufferBuilder, TextureManager textureManager) {
 			textureManager.bindTexture(SpriteAtlasTexture.PARTICLE_ATLAS_TEXTURE);
 			RenderSystem.enableBlend();
-			RenderSystem.disableCull();
 			RenderSystem.depthMask(false);
 			RenderSystem.blendFuncSeparate(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SrcFactor.ONE, GlStateManager.DstFactor.ZERO);
 			RenderSystem.alphaFunc(516, 0.003921569F);

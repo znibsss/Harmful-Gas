@@ -153,7 +153,7 @@ public final class WorldGasComponent implements Component, ServerTickingComponen
 					}
 				}
 				
-				if (!nodes.contains(sidePos) && (sidePosDist < posDist || sidePos.isWithinDistance(((ServerWorld) world).getSpawnPos(), 8F + age / 562.0F)) && sidePos.getY() < world.getTopPosition(Heightmap.Type.WORLD_SURFACE, sidePos).getY() + 2) {
+				if (!nodes.contains(sidePos) && ((age % 600 == 0 && sidePosDist < posDist && sidePos.isWithinDistance(((ServerWorld) world).getSpawnPos(), 192.0F)) || sidePos.isWithinDistance(((ServerWorld) world).getSpawnPos(), 32F + age / 562.0F)) && sidePos.getY() < world.getTopPosition(Heightmap.Type.WORLD_SURFACE, sidePos).getY() + 2) {
 					BlockState sideState = world.getBlockState(sidePos);
 					BlockState centerState = world.getBlockState(pos);
 					
@@ -167,7 +167,7 @@ public final class WorldGasComponent implements Component, ServerTickingComponen
 				double distance = player.squaredDistanceTo(pos.getX(), pos.getY(), pos.getZ());
 				
 				if (distance < 4.0D * 4.0D) {
-					player.damage(DamageSource.DROWN, 1.0F);
+					player.damage(DamageSource.DROWN, 2.0F);
 				}
 				
 				if (pos.getX() % 3 == 0 && pos.getZ() % 3 == 0) {
