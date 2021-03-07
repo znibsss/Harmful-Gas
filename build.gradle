@@ -44,12 +44,16 @@ dependencies {
     include "com.github.OnyxStudios.Cardinal-Components-API:Cardinal-Components-API:${project.cardinal_components_api_version}"
 
     // Satin
-    modImplementation "com.github.Ladysnake:Satin:${satin_version}"
-    include "com.github.Ladysnake:Satin:${satin_version}"
+    modImplementation "com.github.Ladysnake:Satin:${project.satin_version}"
+    include "com.github.Ladysnake:Satin:${project.satin_version}"
 
     // Blade
-    modImplementation "vini2003.xyz:Blade:${blade_version}"
-    include "vini2003.xyz:Blade:${blade_version}"
+    modImplementation "vini2003.xyz:Blade:${project.blade_version}"
+    include "vini2003.xyz:Blade:${project.blade_version}"
+
+    // Cloth API
+    modApi "me.shedaniel.cloth.api:cloth-api:${project.cloth_api_version}"
+    include "me.shedaniel.cloth.api:cloth-api:${project.cloth_api_version}"
 }
 
 processResources {

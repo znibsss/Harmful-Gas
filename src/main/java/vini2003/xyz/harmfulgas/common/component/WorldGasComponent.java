@@ -55,7 +55,7 @@ public final class WorldGasComponent implements Component, ServerTickingComponen
 	private final Set<BlockPos> nodesToAdd = new HashSet<>();
 	private final Set<BlockPos> nodesToRemove = new HashSet<>();
 	
-	private final Map<PlayerEntity, Set<BlockPos>> nodeParticles = new HashMap<>();
+	private final Map<UUID, Set<BlockPos>> nodeParticles = new HashMap<>();
 	
 	private final World world;
 	
@@ -85,7 +85,7 @@ public final class WorldGasComponent implements Component, ServerTickingComponen
 		return nodesToRemove;
 	}
 	
-	public Map<PlayerEntity, Set<BlockPos>> getNodeParticles() {
+	public Map<UUID, Set<BlockPos>> getNodeParticles() {
 		return nodeParticles;
 	}
 	
@@ -150,9 +150,9 @@ public final class WorldGasComponent implements Component, ServerTickingComponen
 				}
 				
 				if (pos.getX() % 3 == 0 && pos.getZ() % 3 == 0) {
-					nodeParticles.putIfAbsent(player, new HashSet<>());
+					nodeParticles.putIfAbsent(player.getUuid(), new HashSet<>());
 					
-					if (!nodeParticles.get(player).contains(pos)) {
+					if (!nodeParticles.get(player.getUuid()).contains(pos)) {
 						PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
 						
 						buf.writeInt(pos.getX());
@@ -161,7 +161,7 @@ public final class WorldGasComponent implements Component, ServerTickingComponen
 						
 						ServerPlayNetworking.send((ServerPlayerEntity) player, HarmfulGasNetworking.ADD_GAS_CLOUD, buf);
 						
-						nodeParticles.get(player).add(pos);
+						nodeParticles.get(player.getUuid()).add(pos);
 					}
 				}
 			}

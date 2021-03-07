@@ -14,10 +14,10 @@ public class HarmfulGasCallbacks {
 	public static void initialize() {
 		WorldRenderEvents.START.register((context) -> {
 			Vector3f[] rotatedVertices = new Vector3f[] {
-					new Vector3f(-4.0F, -4.0F, 0.0F),
-					new Vector3f(-4.0F, 4.0F, 0.0F),
-					new Vector3f(4.0F, 4.0F, 0.0F),
-					new Vector3f(4.0F, -4.0F, 0.0F)
+					new Vector3f(-6.0F, -6.0F, 0.0F),
+					new Vector3f(-6.0F, 6.0F, 0.0F),
+					new Vector3f(6.0F, 6.0F, 0.0F),
+					new Vector3f(6.0F, -6.0F, 0.0F)
 			};
 			
 			for (int i = 0; i < 4; ++i) {
