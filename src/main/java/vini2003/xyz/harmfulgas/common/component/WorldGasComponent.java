@@ -20,7 +20,7 @@ import vini2003.xyz.harmfulgas.registry.common.HarmfulGasComponents;
 import java.util.*;
 
 public final class WorldGasComponent implements Component, ServerTickingComponent {
-	private final Set<BlockPos> nodePositions = new HashSet<>();
+	private final Set<BlockPos> nodes = new HashSet<>();
 	private final List<BlockPos> nodesIndexed = new ArrayList<>();
 	private final Set<BlockPos> nodesToAdd = new HashSet<>();
 	
@@ -52,13 +52,6 @@ public final class WorldGasComponent implements Component, ServerTickingComponen
 		nodesToAdd.add(pos);
 	}
 	
-	private void executeAdditions() {
-		nodesToAdd.forEach(nodePositions::add);
-		nodesToAdd.forEach(nodesIndexed::add);
-		
-		nodesToAdd.clear();
-	}
-	
 	@Override
 	public void serverTick() {
 		if (world == null)
@@ -83,20 +76,24 @@ public final class WorldGasComponent implements Component, ServerTickingComponen
 					
 					double sidePosDist = BlockPosUtilities.minimumSquaredDistance(world.getPlayers(), sidePos);
 					
-					if (!nodePositions.contains(sidePos)
+					if (sidePos.getY() < 90
+							&& sidePos.getY() > 48
+							&& !nodes.contains(sidePos)
 							&& ((age % 600 == 0 && sidePosDist < posDist) || (age % speed == 0 && sidePos.isWithinDistance(originPos, maxDist)))
 							&& sidePos.getY() < world.getTopPosition(Heightmap.Type.WORLD_SURFACE, sidePos).getY() + 2) {
 						BlockState sideState = world.getBlockState(sidePos);
 						BlockState centerState = world.getBlockState(pos);
 						
 						if (GasUtilities.isTraversableForPropagation(world, centerState, pos, sideState, sidePos, direction)) {
-							add(sidePos);
+							nodesToAdd.add(sidePos);
 						}
 					}
 				}
 				
 				for (PlayerEntity player : world.getPlayers()) {
 					double distance = BlockPosUtilities.squaredDistance(player, pos);
+					
+					cooldowns.putIfAbsent(player.getUuid(), 150);
 					
 					if (distance < 1.0D && cooldowns.get(player.getUuid()) == 0) {
 						player.damage(DamageSource.DROWN, 1.0F);
@@ -106,7 +103,7 @@ public final class WorldGasComponent implements Component, ServerTickingComponen
 						particles.putIfAbsent(player.getUuid(), new HashSet<>());
 						
 						if (!particles.get(player.getUuid()).contains(pos)) {
-							HarmfulGasNetworking.setAddGasCloudPacket(player, pos);
+							HarmfulGasNetworking.sendAddGasCloudPacket(player, pos);
 							
 							particles.get(player.getUuid()).add(pos);
 						}
@@ -122,7 +119,10 @@ public final class WorldGasComponent implements Component, ServerTickingComponen
 				}
 			}
 			
-			executeAdditions();
+			nodes.addAll(nodesToAdd);
+			nodesIndexed.addAll(nodesToAdd);
+			
+			nodesToAdd.clear();
 			
 			++progress;
 			
@@ -152,7 +152,7 @@ public final class WorldGasComponent implements Component, ServerTickingComponen
 		
 		int i = 0;
 		
-		for (BlockPos pos : nodePositions) {
+		for (BlockPos pos : nodes) {
 			CompoundTag pointTag = new CompoundTag();
 			pointTag.putLong("Pos", pos.asLong());
 			
@@ -170,7 +170,11 @@ public final class WorldGasComponent implements Component, ServerTickingComponen
 		
 		CompoundTag dataTag = tag.getCompound("Data");
 		
-		this.originPos = new BlockPos(dataTag.getInt("OriginX"), dataTag.getInt("OriginY"), dataTag.getInt("OriginZ"));
+		this.originPos = new BlockPos(
+				dataTag.getInt("OriginX"),
+				dataTag.getInt("OriginY"),
+				dataTag.getInt("OriginZ")
+		);
 		
 		this.paused = dataTag.getBoolean("Paused");
 		
@@ -182,7 +186,7 @@ public final class WorldGasComponent implements Component, ServerTickingComponen
 		for (String key : dataTag.getKeys()) {
 			CompoundTag pointTag = dataTag.getCompound(key);
 			
-			add(BlockPos.fromLong(pointTag.getLong("Pos")));
+			this.nodesToAdd.add(BlockPos.fromLong(pointTag.getLong("Pos")));
 		}
 	}
 	
@@ -201,22 +205,6 @@ public final class WorldGasComponent implements Component, ServerTickingComponen
 	
 	public Set<BlockPos> getParticles(UUID uuid) {
 		return particles.get(uuid);
-	}
-	
-	public void addParticle(UUID uuid, BlockPos pos) {
-		particles.putIfAbsent(uuid, new HashSet<>());
-		
-		particles.get(uuid).add(pos);
-	}
-	
-	public void removeParticle(UUID uuid, BlockPos pos) {
-		particles.putIfAbsent(uuid, new HashSet<>());
-		
-		particles.get(uuid).remove(pos);
-	}
-	
-	public void removeParticles(UUID uuid) {
-		particles.remove(uuid);
 	}
 	
 	public Map<UUID, Integer> getCooldowns() {

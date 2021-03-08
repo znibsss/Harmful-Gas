@@ -9,7 +9,7 @@ import org.jetbrains.annotations.Nullable;
 import vini2003.xyz.harmfulgas.client.utilities.ClientUtilities;
 import vini2003.xyz.harmfulgas.registry.client.HarmfulGasTextureSheets;
 
-import static vini2003.xyz.harmfulgas.HarmfulGasClient.rotatedVertices;
+import static vini2003.xyz.harmfulgas.client.utilities.GasParticleUtilities.rotatedVertices;
 
 public class GasCloudParticle extends SpriteBillboardParticle {
 	public GasCloudParticle(ClientWorld clientWorld, double x, double y, double z) {
@@ -18,10 +18,10 @@ public class GasCloudParticle extends SpriteBillboardParticle {
 	
 	@Override
 	public void buildGeometry(VertexConsumer vertexConsumer, Camera camera, float tickDelta) {
-		if (colorAlpha < 0.3F) {
+		if (colorAlpha < 0.25F) {
 			colorAlpha += 0.0005F;
 		} else {
-			colorAlpha = 0.3F;
+			colorAlpha = 0.25F;
 		}
 		
 		if (ClientUtilities.getPlayer().squaredDistanceTo(x, y, z) > 192.0D * 192.0D) {
@@ -56,7 +56,7 @@ public class GasCloudParticle extends SpriteBillboardParticle {
 			GasCloudParticle gasCloudParticle = new GasCloudParticle(world, x, y, z);
 			gasCloudParticle.sprite = spriteProvider.getSprite(gasCloudParticle.random);
 			gasCloudParticle.maxAge = Integer.MAX_VALUE;
-			gasCloudParticle.scale = 4F;
+			gasCloudParticle.scale = 6F;
 			gasCloudParticle.colorAlpha = 0F;
 			
 			return gasCloudParticle;

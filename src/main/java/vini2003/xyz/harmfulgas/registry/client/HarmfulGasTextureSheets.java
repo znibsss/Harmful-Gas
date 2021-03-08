@@ -13,10 +13,12 @@ public class HarmfulGasTextureSheets {
 	public static final ParticleTextureSheet GAS = new ParticleTextureSheet() {
 		public void begin(BufferBuilder bufferBuilder, TextureManager textureManager) {
 			textureManager.bindTexture(SpriteAtlasTexture.PARTICLE_ATLAS_TEXTURE);
+			
 			RenderSystem.enableBlend();
 			RenderSystem.depthMask(false);
 			RenderSystem.blendFuncSeparate(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SrcFactor.ONE, GlStateManager.DstFactor.ZERO);
 			RenderSystem.alphaFunc(516, 0.003921569F);
+			
 			bufferBuilder.begin(7, VertexFormats.POSITION_TEXTURE_COLOR_LIGHT);
 		}
 		
