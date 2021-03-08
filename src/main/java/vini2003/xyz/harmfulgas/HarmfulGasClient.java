@@ -8,7 +8,7 @@ import vini2003.xyz.harmfulgas.registry.client.*;
 
 @Environment(EnvType.CLIENT)
 public class HarmfulGasClient implements ClientModInitializer {
-	public static boolean isNearGasCloud= false;
+	public static boolean isNearGasCloud = false;
 	
 	public static Vector3f[] rotatedVertices;
 	

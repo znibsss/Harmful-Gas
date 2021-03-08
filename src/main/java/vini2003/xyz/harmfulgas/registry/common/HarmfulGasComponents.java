@@ -1,7 +1,5 @@
 package vini2003.xyz.harmfulgas.registry.common;
 
-import dev.onyxstudios.cca.api.v3.chunk.ChunkComponentFactoryRegistry;
-import dev.onyxstudios.cca.api.v3.chunk.ChunkComponentInitializer;
 import dev.onyxstudios.cca.api.v3.component.ComponentKey;
 import dev.onyxstudios.cca.api.v3.component.ComponentRegistry;
 import dev.onyxstudios.cca.api.v3.world.WorldComponentFactoryRegistry;

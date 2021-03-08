@@ -1,108 +1,50 @@
-package vini2003.xyz.harmfulgas.common.component;/*
- * MIT License
- *
- * Copyright (c) 2020 Chainmail Studios
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
+package vini2003.xyz.harmfulgas.common.component;
 
-import io.netty.buffer.Unpooled;
-import it.unimi.dsi.fastutil.objects.Object2BooleanArrayMap;
-
-import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import dev.onyxstudios.cca.api.v3.component.Component;
+import dev.onyxstudios.cca.api.v3.component.tick.ServerTickingComponent;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.Heightmap;
 import net.minecraft.world.World;
-import dev.onyxstudios.cca.api.v3.component.Component;
-import dev.onyxstudios.cca.api.v3.component.tick.ServerTickingComponent;
 import org.jetbrains.annotations.Nullable;
-
+import vini2003.xyz.harmfulgas.common.utilities.BlockPosUtilities;
 import vini2003.xyz.harmfulgas.common.utilities.DirectionUtilities;
-import vini2003.xyz.harmfulgas.common.utilities.WorldUtilities;
+import vini2003.xyz.harmfulgas.common.utilities.GasUtilities;
 import vini2003.xyz.harmfulgas.registry.client.HarmfulGasNetworking;
 import vini2003.xyz.harmfulgas.registry.common.HarmfulGasComponents;
 
 import java.util.*;
-import java.util.function.ToDoubleFunction;
 
 public final class WorldGasComponent implements Component, ServerTickingComponent {
 	private final Set<BlockPos> nodes = new HashSet<>();
 	private final List<BlockPos> nodesIndexed = new ArrayList<>();
 	private final Set<BlockPos> nodesToAdd = new HashSet<>();
-	private final Set<BlockPos> nodesToRemove = new HashSet<>();
 	
 	private final Map<UUID, Set<BlockPos>> nodeParticles = new HashMap<>();
 	
+	private final Map<UUID, Integer> cooldowns = new HashMap<>();
+	
 	private final World world;
+	
+	private boolean paused;
 	
 	private long age;
 	
 	private int tick;
 	
+	private int speed;
+	
 	public WorldGasComponent(World world) {
 		this.world = world;
+		this.paused = false;
 		this.age = 0;
 		this.tick = 0;
-	}
-	
-	public World getWorld() {
-		return world;
-	}
-	
-	public Set<BlockPos> getNodes() {
-		return nodes;
-	}
-	
-	public Set<BlockPos> getNodesToAdd() {
-		return nodesToAdd;
-	}
-	
-	public Set<BlockPos> getNodesToRemove() {
-		return nodesToRemove;
-	}
-	
-	public Map<UUID, Set<BlockPos>> getNodeParticles() {
-		return nodeParticles;
-	}
-	
-	public long getAge() {
-		return age;
-	}
-	
-	public void remove(BlockPos pos) {
-		nodesToRemove.add(pos);
-	}
-	
-	private void executeRemovals() {
-		nodesToRemove.forEach(nodes::remove);
-		nodesToRemove.forEach(nodesIndexed::remove);
-		
-		nodesToRemove.clear();
+		this.speed = 20;
 	}
 	
 	public void add(BlockPos pos) {
@@ -121,83 +63,70 @@ public final class WorldGasComponent implements Component, ServerTickingComponen
 		if (world == null)
 			return;
 		
-		++age;
-		
-		int start = nodesIndexed.size() / 20 * tick;
-		
-		int end = Math.min(Math.max(256, start + nodesIndexed.size() / 20), nodesIndexed.size());
-		
-		for (int i = start; i < end; ++i) {
-			BlockPos pos = nodesIndexed.get(i);
+		if (!isPaused()) {
+			++age;
 			
-			double posDist = Integer.MAX_VALUE;
+			int start = nodesIndexed.size() / speed * tick;
 			
-			for (PlayerEntity player : world.getPlayers()) {
-				double newPosDist = player.squaredDistanceTo(pos.getX(), pos.getY(), pos.getZ());
+			int end = Math.min(Math.max(256, start + nodesIndexed.size() / speed), nodesIndexed.size());
+			
+			for (int i = start; i < end; ++i) {
+				BlockPos pos = nodesIndexed.get(i);
 				
-				if (newPosDist < posDist) {
-					posDist = newPosDist;
+				double posDist = BlockPosUtilities.minimumSquaredDistance(world.getPlayers(), pos);
+				
+				for (Direction direction : DirectionUtilities.DIRECTIONS) {
+					BlockPos sidePos = pos.offset(direction);
+					
+					double sidePosDist = BlockPosUtilities.minimumSquaredDistance(world.getPlayers(), sidePos);
+					
+					if (!nodes.contains(sidePos)
+							&& ((age % 600 == 0 && sidePosDist < posDist) || sidePos.isWithinDistance(((ServerWorld) world).getSpawnPos(), 32F + age / (375.0F / (21 - speed))))
+							&& sidePos.getY() < world.getTopPosition(Heightmap.Type.WORLD_SURFACE, sidePos).getY() + 2) {
+						BlockState sideState = world.getBlockState(sidePos);
+						BlockState centerState = world.getBlockState(pos);
+						
+						if (GasUtilities.isTraversableForPropagation(world, centerState, pos, sideState, sidePos, direction)) {
+							add(sidePos);
+						}
+					}
 				}
-			}
-			
-			for (Direction direction : DirectionUtilities.DIRECTIONS) {
-				BlockPos sidePos = pos.offset(direction);
-				
-				double sidePosDist = Integer.MAX_VALUE;
 				
 				for (PlayerEntity player : world.getPlayers()) {
-					double newSidePosDist = player.squaredDistanceTo(sidePos.getX(), sidePos.getY(), sidePos.getZ());
+					double distance = BlockPosUtilities.squaredDistance(player, pos);
 					
-					if (newSidePosDist < sidePosDist) {
-						sidePosDist = newSidePosDist;
+					cooldowns.putIfAbsent(player.getUuid(), 300);
+					
+					if (distance < 4.0D * 4.0D && cooldowns.get(player.getUuid()) == 0) {
+						player.damage(DamageSource.DROWN, 1.0F);
 					}
-				}
-				
-				if (!nodes.contains(sidePos) && ((age % 600 == 0 && sidePosDist < posDist && sidePos.isWithinDistance(((ServerWorld) world).getSpawnPos(), 192.0F)) || sidePos.isWithinDistance(((ServerWorld) world).getSpawnPos(), 32F + age / 562.0F)) && sidePos.getY() < world.getTopPosition(Heightmap.Type.WORLD_SURFACE, sidePos).getY() + 2) {
-					BlockState sideState = world.getBlockState(sidePos);
-					BlockState centerState = world.getBlockState(pos);
 					
-					if (WorldUtilities.isTraversableForPropagation(world, centerState, pos, sideState, sidePos, direction)) {
-						add(sidePos);
+					if (cooldowns.get(player.getUuid()) > 0) {
+						cooldowns.put(player.getUuid(), cooldowns.get(player.getUuid()) - 1);
+					}
+					
+					if (pos.getX() % 3 == 0 && pos.getZ() % 3 == 0) {
+						nodeParticles.putIfAbsent(player.getUuid(), new HashSet<>());
+						
+						if (!nodeParticles.get(player.getUuid()).contains(pos)) {
+							HarmfulGasNetworking.setAddGasCloudPacket(player, pos);
+							
+							nodeParticles.get(player.getUuid()).add(pos);
+						}
 					}
 				}
 			}
 			
-			for (PlayerEntity player : world.getPlayers()) {
-				double distance = player.squaredDistanceTo(pos.getX(), pos.getY(), pos.getZ());
-				
-				if (distance < 4.0D * 4.0D) {
-					player.damage(DamageSource.DROWN, 2.0F);
-				}
-				
-				if (pos.getX() % 3 == 0 && pos.getZ() % 3 == 0) {
-					nodeParticles.putIfAbsent(player.getUuid(), new HashSet<>());
-					
-					if (!nodeParticles.get(player.getUuid()).contains(pos)) {
-						PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
-						
-						buf.writeInt(pos.getX());
-						buf.writeInt(pos.getY());
-						buf.writeInt(pos.getZ());
-						
-						ServerPlayNetworking.send((ServerPlayerEntity) player, HarmfulGasNetworking.ADD_GAS_CLOUD, buf);
-						
-						nodeParticles.get(player.getUuid()).add(pos);
-					}
-				}
+			executeAdditions();
+			
+			++tick;
+			
+			if (tick >= speed) {
+				tick = 0;
 			}
 		}
-		
-		executeAdditions();
-		executeRemovals();
-		
-		++tick;
-		
-		if (tick == 20) {
-			tick = 0;
-		}
 	}
-
+	
 	@Override
 	public void writeToNbt(CompoundTag tag) {
 		if (world == null)
@@ -239,5 +168,45 @@ public final class WorldGasComponent implements Component, ServerTickingComponen
 		} catch (Exception justShutUpAlready) {
 			return null;
 		}
+	}
+	
+	public World getWorld() {
+		return world;
+	}
+	
+	public Set<BlockPos> getNodes() {
+		return nodes;
+	}
+	
+	public Set<BlockPos> getNodesToAdd() {
+		return nodesToAdd;
+	}
+	
+	public Map<UUID, Set<BlockPos>> getNodeParticles() {
+		return nodeParticles;
+	}
+	
+	public Map<UUID, Integer> getCooldowns() {
+		return cooldowns;
+	}
+	
+	public long getAge() {
+		return age;
+	}
+	
+	public boolean isPaused() {
+		return paused;
+	}
+	
+	public void setPaused(boolean paused) {
+		this.paused = paused;
+	}
+	
+	public int getSpeed() {
+		return speed;
+	}
+	
+	public void setSpeed(int speed) {
+		this.speed = speed;
 	}
 }

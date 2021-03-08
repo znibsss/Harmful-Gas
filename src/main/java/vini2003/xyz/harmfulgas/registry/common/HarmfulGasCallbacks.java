@@ -1,8 +1,7 @@
 package vini2003.xyz.harmfulgas.registry.common;
 
-import me.shedaniel.cloth.api.common.events.v1.PlayerChangeWorldCallback;
-import me.shedaniel.cloth.api.utils.v1.GameInstanceUtils;
 import net.fabricmc.fabric.api.entity.event.v1.ServerEntityWorldChangeEvents;
+import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import vini2003.xyz.harmfulgas.common.component.WorldGasComponent;
 
 public class HarmfulGasCallbacks {
@@ -11,6 +10,14 @@ public class HarmfulGasCallbacks {
 			WorldGasComponent gasComponent = WorldGasComponent.get(origin);
 			
 			gasComponent.getNodeParticles().remove(player.getUuid());
+			gasComponent.getCooldowns().put(player.getUuid(), 300);
+		}));
+		
+		ServerPlayerEvents.AFTER_RESPAWN.register(((oldPlayer, newPlayer, alive) -> {
+			WorldGasComponent gasComponent = WorldGasComponent.get(newPlayer.getServerWorld());
+			
+			gasComponent.getNodeParticles().remove(newPlayer.getUuid());
+			gasComponent.getCooldowns().put(newPlayer.getUuid(), 300);
 		}));
 	}
 }

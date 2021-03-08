@@ -2,7 +2,9 @@ package vini2003.xyz.harmfulgas;
 
 import net.fabricmc.api.ModInitializer;
 import net.minecraft.util.Identifier;
-import vini2003.xyz.harmfulgas.registry.common.*;
+import vini2003.xyz.harmfulgas.registry.common.HarmfulGasCallbacks;
+import vini2003.xyz.harmfulgas.registry.common.HarmfulGasCommands;
+import vini2003.xyz.harmfulgas.registry.common.HarmfulGasComponents;
 
 public class HarmfulGas implements ModInitializer {
 	public static final String ID = "harmfulgas";

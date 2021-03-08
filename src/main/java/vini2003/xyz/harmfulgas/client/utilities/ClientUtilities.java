@@ -5,7 +5,6 @@ import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.particle.ParticleManager;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.texture.TextureManager;
-import net.minecraft.entity.player.PlayerEntity;
 
 public class ClientUtilities {
 	public static ClientPlayerEntity getPlayer() {

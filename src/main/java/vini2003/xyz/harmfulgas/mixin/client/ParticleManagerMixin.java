@@ -1,10 +1,8 @@
 package vini2003.xyz.harmfulgas.mixin.client;
 
 import com.google.common.collect.EvictingQueue;
-import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleManager;
 import net.minecraft.client.particle.ParticleTextureSheet;
-import net.minecraft.client.texture.TextureManager;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
@@ -13,7 +11,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import vini2003.xyz.harmfulgas.registry.client.HarmfulGasTextureSheets;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Mixin(ParticleManager.class)
 public class ParticleManagerMixin {

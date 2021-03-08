@@ -8,10 +8,6 @@ import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.texture.TextureManager;
-import org.lwjgl.opengl.GL;
-import org.lwjgl.opengl.GL11;
-
-import static org.lwjgl.opengl.GL11.*;
 
 public class HarmfulGasTextureSheets {
 	public static final ParticleTextureSheet GAS = new ParticleTextureSheet() {

@@ -5,6 +5,6 @@ import vini2003.xyz.harmfulgas.client.particle.GasCloudParticle;
 
 public class HarmfulGasParticleFactories {
 	public static void initialize() {
-        ParticleFactoryRegistry.getInstance().register(HarmfulGasParticleTypes.GAS, GasCloudParticle.Factory::new);
+		ParticleFactoryRegistry.getInstance().register(HarmfulGasParticleTypes.GAS, GasCloudParticle.Factory::new);
 	}
 }

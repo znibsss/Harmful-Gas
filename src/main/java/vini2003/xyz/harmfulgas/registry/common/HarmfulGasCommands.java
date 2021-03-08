@@ -1,23 +1,45 @@
 package vini2003.xyz.harmfulgas.registry.common;
 
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
-import net.minecraft.command.argument.BlockPosArgumentType;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.World;
 import vini2003.xyz.harmfulgas.common.component.WorldGasComponent;
 
 public class HarmfulGasCommands {
-	public static int place(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-		BlockPos pos = BlockPosArgumentType.getBlockPos(context, "pos");
-		
+	public static int start(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
 		World world = context.getSource().getWorld();
 		
-		WorldGasComponent.get(world).add(pos);
+		WorldGasComponent gasComponent = WorldGasComponent.get(world);
+		
+		gasComponent.add(((ServerWorld) world).getSpawnPos());
+		
+		return 1;
+	}
+	
+	public static int pause(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+		World world = context.getSource().getWorld();
+		
+		WorldGasComponent gasComponent = WorldGasComponent.get(world);
+		
+		gasComponent.setPaused(!gasComponent.isPaused());
+		
+		return 1;
+	}
+	
+	public static int speed(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+		World world = context.getSource().getWorld();
+		
+		WorldGasComponent gasComponent = WorldGasComponent.get(world);
+		
+		int speed = IntegerArgumentType.getInteger(context, "speed");
+		
+		gasComponent.setSpeed(speed);
 		
 		return 1;
 	}
@@ -27,14 +49,32 @@ public class HarmfulGasCommands {
 			LiteralCommandNode<ServerCommandSource> harmfulGasRoot = CommandManager.literal("harmfulgas").build();
 			
 			LiteralCommandNode<ServerCommandSource> harmfulGasPlace =
-					CommandManager.literal("place")
+					CommandManager.literal("start")
 							.requires((source) -> source.hasPermissionLevel(2))
-							.then(
-									CommandManager.argument("pos", BlockPosArgumentType.blockPos()).executes(HarmfulGasCommands::place).build()
-							)
+							.executes(HarmfulGasCommands::start)
 							.build();
 			
+			LiteralCommandNode<ServerCommandSource> harmfulGasPause =
+					CommandManager.literal("pause")
+							.requires((source) -> source.hasPermissionLevel(2))
+							.executes(HarmfulGasCommands::pause)
+							.build();
+			
+			LiteralCommandNode<ServerCommandSource> harmfulGasSpeed =
+					CommandManager.literal("speed")
+							.requires((source) -> source.hasPermissionLevel(2))
+							.then(
+									CommandManager.argument("speed", IntegerArgumentType.integer(1, 100))
+											.executes(HarmfulGasCommands::speed)
+											.build()
+							)
+							.executes(HarmfulGasCommands::pause)
+							.build();
+			
+			
 			harmfulGasRoot.addChild(harmfulGasPlace);
+			harmfulGasRoot.addChild(harmfulGasPause);
+			harmfulGasRoot.addChild(harmfulGasSpeed);
 			
 			dispatcher.getRoot().addChild(harmfulGasRoot);
 		});
