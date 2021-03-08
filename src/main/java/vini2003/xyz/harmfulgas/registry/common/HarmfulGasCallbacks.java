@@ -10,14 +10,14 @@ public class HarmfulGasCallbacks {
 			WorldGasComponent gasComponent = WorldGasComponent.get(origin);
 			
 			gasComponent.getNodeParticles().remove(player.getUuid());
-			gasComponent.getCooldowns().put(player.getUuid(), 300);
+			gasComponent.getCooldowns().put(player.getUuid(), 150);
 		}));
 		
 		ServerPlayerEvents.AFTER_RESPAWN.register(((oldPlayer, newPlayer, alive) -> {
 			WorldGasComponent gasComponent = WorldGasComponent.get(newPlayer.getServerWorld());
 			
 			gasComponent.getNodeParticles().remove(newPlayer.getUuid());
-			gasComponent.getCooldowns().put(newPlayer.getUuid(), 300);
+			gasComponent.getCooldowns().put(newPlayer.getUuid(), 150);
 		}));
 	}
 }

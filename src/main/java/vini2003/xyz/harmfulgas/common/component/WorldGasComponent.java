@@ -95,14 +95,8 @@ public final class WorldGasComponent implements Component, ServerTickingComponen
 				for (PlayerEntity player : world.getPlayers()) {
 					double distance = BlockPosUtilities.squaredDistance(player, pos);
 					
-					cooldowns.putIfAbsent(player.getUuid(), 300);
-					
 					if (distance < 4.0D * 4.0D && cooldowns.get(player.getUuid()) == 0) {
 						player.damage(DamageSource.DROWN, 1.0F);
-					}
-					
-					if (cooldowns.get(player.getUuid()) > 0) {
-						cooldowns.put(player.getUuid(), cooldowns.get(player.getUuid()) - 1);
 					}
 					
 					if (pos.getX() % 3 == 0 && pos.getZ() % 3 == 0) {
@@ -114,6 +108,14 @@ public final class WorldGasComponent implements Component, ServerTickingComponen
 							nodeParticles.get(player.getUuid()).add(pos);
 						}
 					}
+				}
+			}
+			
+			for (PlayerEntity player : world.getPlayers()) {
+				cooldowns.putIfAbsent(player.getUuid(), 150);
+				
+				if (cooldowns.get(player.getUuid()) > 0) {
+					cooldowns.put(player.getUuid(), cooldowns.get(player.getUuid()) - 1);
 				}
 			}
 			

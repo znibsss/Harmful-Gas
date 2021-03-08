@@ -10,16 +10,4 @@ public class ClientUtilities {
 	public static ClientPlayerEntity getPlayer() {
 		return MinecraftClient.getInstance().player;
 	}
-	
-	public static Tessellator getTessellator() {
-		return Tessellator.getInstance();
-	}
-	
-	public static TextureManager getTextureManager() {
-		return MinecraftClient.getInstance().getTextureManager();
-	}
-	
-	public static ParticleManager getParticleManager() {
-		return MinecraftClient.getInstance().particleManager;
-	}
 }

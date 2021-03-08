@@ -51,7 +51,7 @@ public class GasCloudParticle extends SpriteBillboardParticle {
 			gasCloudParticle.sprite = spriteProvider.getSprite(gasCloudParticle.random);
 			gasCloudParticle.maxAge = Integer.MAX_VALUE;
 			gasCloudParticle.scale = 4F;
-			gasCloudParticle.colorAlpha = 0.35F;
+			gasCloudParticle.colorAlpha = 0.3F;
 			
 			return gasCloudParticle;
 		}
