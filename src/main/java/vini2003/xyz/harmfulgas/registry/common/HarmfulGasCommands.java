@@ -24,7 +24,7 @@ public class HarmfulGasCommands {
 		WorldGasComponent gasComponent = WorldGasComponent.get(world);
 		
 		gasComponent.add(pos);
-		gasComponent.setOriginPos(pos);
+		gasComponent.setOriginPos(((ServerWorld) world).getSpawnPos());
 		gasComponent.getCooldowns().put(player.getUuid(), 300);
 		
 		return 1;
