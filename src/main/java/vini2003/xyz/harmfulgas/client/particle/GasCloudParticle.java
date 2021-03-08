@@ -18,6 +18,12 @@ public class GasCloudParticle extends SpriteBillboardParticle {
 	
 	@Override
 	public void buildGeometry(VertexConsumer vertexConsumer, Camera camera, float tickDelta) {
+		if (colorAlpha < 0.3F) {
+			colorAlpha += 0.0005F;
+		} else {
+			colorAlpha = 0.3F;
+		}
+		
 		if (ClientUtilities.getPlayer().squaredDistanceTo(x, y, z) > 192.0D * 192.0D) {
 			return;
 		}
@@ -51,7 +57,7 @@ public class GasCloudParticle extends SpriteBillboardParticle {
 			gasCloudParticle.sprite = spriteProvider.getSprite(gasCloudParticle.random);
 			gasCloudParticle.maxAge = Integer.MAX_VALUE;
 			gasCloudParticle.scale = 4F;
-			gasCloudParticle.colorAlpha = 0.3F;
+			gasCloudParticle.colorAlpha = 0F;
 			
 			return gasCloudParticle;
 		}

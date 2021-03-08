@@ -31,6 +31,8 @@ public final class WorldGasComponent implements Component, ServerTickingComponen
 	
 	private final World world;
 	
+	private BlockPos originPos;
+	
 	private boolean paused;
 	
 	private long age;
@@ -81,7 +83,7 @@ public final class WorldGasComponent implements Component, ServerTickingComponen
 					double sidePosDist = BlockPosUtilities.minimumSquaredDistance(world.getPlayers(), sidePos);
 					
 					if (!nodes.contains(sidePos)
-							&& ((age % 600 == 0 && sidePosDist < posDist) || sidePos.isWithinDistance(((ServerWorld) world).getSpawnPos(), 32F + age / (375.0F / (21 - speed))))
+							&& ((age % 600 == 0 && sidePosDist < posDist) || sidePos.isWithinDistance(originPos, 32F + age / (375.0F / (21 - speed))))
 							&& sidePos.getY() < world.getTopPosition(Heightmap.Type.WORLD_SURFACE, sidePos).getY() + 2) {
 						BlockState sideState = world.getBlockState(sidePos);
 						BlockState centerState = world.getBlockState(pos);
@@ -210,5 +212,13 @@ public final class WorldGasComponent implements Component, ServerTickingComponen
 	
 	public void setSpeed(int speed) {
 		this.speed = speed;
+	}
+	
+	public BlockPos getOriginPos() {
+		return originPos;
+	}
+	
+	public void setOriginPos(BlockPos originPos) {
+		this.originPos = originPos;
 	}
 }
