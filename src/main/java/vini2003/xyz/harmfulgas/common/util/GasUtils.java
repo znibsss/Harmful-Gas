@@ -1,4 +1,4 @@
-package vini2003.xyz.harmfulgas.common.utilities;
+package vini2003.xyz.harmfulgas.common.util;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.state.property.Properties;
@@ -7,7 +7,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 
-public class GasUtilities {
+public class GasUtils {
 	public static boolean isTraversableForPropagation(World world, BlockState centerState, BlockPos centerPos, BlockState sideState, BlockPos sidePos, Direction direction) {
 		if (world == null) return false;
 		

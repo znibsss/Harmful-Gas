@@ -1,7 +1,7 @@
 {
-  "text.harmfulgas.paused": "Paused the gas",
-  "text.harmfulgas.resumed": "Resumed the gas",
-  "text.harmfulgas.speed": "Changed the gas speed from %s to %s",
-  "text.harmfulgas.start": "Started the gas",
-  "text.harmfulgas.refresh": "Refreshed the gas"
+  "text.harmfulgas.paused": "Gas effects and propagation are §aenabled§r.",
+  "text.harmfulgas.resumed": "Gas effects and propagation are §cdisabled§r.",
+  "text.harmfulgas.speed": "Gas speed changed from §a%s§r to §a%s§r.",
+  "text.harmfulgas.start": "Gas effects and propagation §astarted§a.",
+  "text.harmfulgas.refresh": "Gas refreshed."
 }

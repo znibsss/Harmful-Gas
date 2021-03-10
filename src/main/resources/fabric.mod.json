@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "id": "bodyshuffle",
+  "id": "harmfulgas",
   "version": "${version}",
-  "name": "Body Shuffle",
-  "description": "A mod adding a body part toggle and randomly mutating your body every few minutes.",
+  "name": "Harmful Gas",
+  "description": "A mod adding gas to your Minecraft world; which seeks and destroys you.",
   "authors": [
     "vini2003"
   ],

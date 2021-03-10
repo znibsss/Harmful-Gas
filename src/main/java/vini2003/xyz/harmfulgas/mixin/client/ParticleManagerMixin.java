@@ -4,7 +4,6 @@ import com.google.common.collect.EvictingQueue;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleManager;
 import net.minecraft.client.particle.ParticleTextureSheet;
-import org.lwjgl.system.CallbackI;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
@@ -13,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import vini2003.xyz.harmfulgas.client.utilities.GasParticleUtilities;
+import vini2003.xyz.harmfulgas.client.util.GasParticleUtils;
 import vini2003.xyz.harmfulgas.registry.client.HarmfulGasTextureSheets;
 
 import java.util.ArrayList;
@@ -28,7 +27,9 @@ public class ParticleManagerMixin {
 	@Mutable
 	private static List<ParticleTextureSheet> PARTICLE_TEXTURE_SHEETS;
 	
-	@Shadow @Final private Map<ParticleTextureSheet, Queue<Particle>> particles;
+	@Shadow
+	@Final
+	private Map<ParticleTextureSheet, Queue<Particle>> particles;
 	
 	@Redirect(at = @At(value = "INVOKE", target = "Lcom/google/common/collect/EvictingQueue;create(I)Lcom/google/common/collect/EvictingQueue;"), method = "method_18125")
 	private static <E> EvictingQueue<E> harmfulgas_method_18125(int maxSize) {
@@ -37,10 +38,14 @@ public class ParticleManagerMixin {
 	
 	@Inject(at = @At("HEAD"), method = "tick")
 	void harmfulgas_tick(CallbackInfo ci) {
-		if (GasParticleUtilities.shouldClear) {
-			particles.get(HarmfulGasTextureSheets.GAS).clear();
+		if (GasParticleUtils.shouldClear) {
+			if (particles != null) {
+				if (particles.containsKey(HarmfulGasTextureSheets.GAS)) {
+					particles.get(HarmfulGasTextureSheets.GAS).clear();
+				}
+			}
 			
-			GasParticleUtilities.shouldClear = false;
+			GasParticleUtils.shouldClear = false;
 		}
 	}
 	

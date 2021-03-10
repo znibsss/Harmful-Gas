@@ -10,8 +10,6 @@ import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.TranslatableText;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import vini2003.xyz.harmfulgas.common.component.WorldGasComponent;
 import vini2003.xyz.harmfulgas.registry.client.HarmfulGasNetworking;
@@ -22,15 +20,13 @@ public class HarmfulGasCommands {
 		
 		PlayerEntity player = context.getSource().getPlayer();
 		
-		BlockPos pos = context.getSource().getEntity().getBlockPos();
-		
 		WorldGasComponent gasComponent = WorldGasComponent.get(world);
 		
-		gasComponent.add(pos);
+		gasComponent.add(((ServerWorld) world).getSpawnPos());
 		gasComponent.setOriginPos(((ServerWorld) world).getSpawnPos());
 		gasComponent.getCooldowns().put(player.getUuid(), 300);
 		
-		player.sendMessage(new TranslatableText("text.harmfulgas.start").formatted(Formatting.GREEN), true);
+		context.getSource().sendFeedback(new TranslatableText("text.harmfulgas.start"), true);
 		
 		return 1;
 	}
@@ -38,31 +34,36 @@ public class HarmfulGasCommands {
 	public static int pause(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
 		World world = context.getSource().getWorld();
 		
-		PlayerEntity player = context.getSource().getPlayer();
-		
 		WorldGasComponent gasComponent = WorldGasComponent.get(world);
 		
-		gasComponent.setPaused(!gasComponent.isPaused());
+		gasComponent.setPaused(true);
 		
-		if (gasComponent.isPaused()) {
-			player.sendMessage(new TranslatableText("text.harmfulgas.paused").formatted(Formatting.GREEN), true);
-		} else {
-			player.sendMessage(new TranslatableText("text.harmfulgas.unpaused").formatted(Formatting.RED), true);
-		}
+		context.getSource().sendFeedback(new TranslatableText("text.harmfulgas.paused"), true);
 		
 		return 1;
 	}
 	
-	public static int speed(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+	public static int resume(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
 		World world = context.getSource().getWorld();
 		
-		PlayerEntity player = context.getSource().getPlayer();
+		WorldGasComponent gasComponent = WorldGasComponent.get(world);
+		
+		gasComponent.setPaused(false);
+		
+		context.getSource().sendFeedback(new TranslatableText("text.harmfulgas.resumed"), true);
+		
+		return 1;
+	}
+	
+	
+	public static int speed(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+		World world = context.getSource().getWorld();
 		
 		WorldGasComponent gasComponent = WorldGasComponent.get(world);
 		
 		int speed = IntegerArgumentType.getInteger(context, "speed");
 		
-		player.sendMessage(new TranslatableText("text.harmfulgas.speed", gasComponent.getSpeed(), speed).formatted(Formatting.GOLD), true);
+		context.getSource().sendFeedback(new TranslatableText("text.harmfulgas.speed", gasComponent.getSpeed(), speed), true);
 		
 		gasComponent.setSpeed(speed);
 		
@@ -81,7 +82,7 @@ public class HarmfulGasCommands {
 		gasComponent.getParticles().remove(player.getUuid());
 		gasComponent.getCooldowns().put(player.getUuid(), 150);
 		
-		player.sendMessage(new TranslatableText("text.harmfulgas.refresh").formatted(Formatting.GOLD), true);
+		context.getSource().sendFeedback(new TranslatableText("text.harmfulgas.refresh"), true);
 		
 		return 1;
 	}
@@ -100,6 +101,12 @@ public class HarmfulGasCommands {
 					CommandManager.literal("pause")
 							.requires((source) -> source.hasPermissionLevel(2))
 							.executes(HarmfulGasCommands::pause)
+							.build();
+			
+			LiteralCommandNode<ServerCommandSource> harmfulGasResume =
+					CommandManager.literal("resume")
+							.requires((source) -> source.hasPermissionLevel(2))
+							.executes(HarmfulGasCommands::resume)
 							.build();
 			
 			LiteralCommandNode<ServerCommandSource> harmfulGasSpeed =
@@ -122,6 +129,7 @@ public class HarmfulGasCommands {
 			
 			harmfulGasRoot.addChild(harmfulGasPlace);
 			harmfulGasRoot.addChild(harmfulGasPause);
+			harmfulGasRoot.addChild(harmfulGasResume);
 			harmfulGasRoot.addChild(harmfulGasSpeed);
 			harmfulGasRoot.addChild(harmfulGasRefresh);
 			

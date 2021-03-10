@@ -12,7 +12,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import vini2003.xyz.harmfulgas.HarmfulGas;
-import vini2003.xyz.harmfulgas.client.utilities.GasParticleUtilities;
+import vini2003.xyz.harmfulgas.client.util.GasParticleUtils;
 
 public class HarmfulGasNetworking {
 	public static final Identifier ADD_GAS_CLOUD = HarmfulGas.identifier("add_gas_cloud");
@@ -20,11 +20,13 @@ public class HarmfulGasNetworking {
 	public static final Identifier REFRESH_GAS_CLOUD = HarmfulGas.identifier("refresh_gas_cloud");
 	
 	private static void receiveAddGasCloudPacket(MinecraftClient client, ClientPlayNetworkHandler handler, PacketByteBuf buf, PacketSender sender) {
-		client.world.addParticle(HarmfulGasParticleTypes.GAS, buf.readInt(), buf.readInt(), buf.readInt(), 0D, 0D, 0D);
+		if (client.world != null) {
+			client.world.addParticle(HarmfulGasParticleTypes.GAS, buf.readInt(), buf.readInt(), buf.readInt(), 0D, 0D, 0D);
+		}
 	}
 	
 	private static void receiveRefreshGasCloudPacket(MinecraftClient client, ClientPlayNetworkHandler handler, PacketByteBuf buf, PacketSender sender) {
-		GasParticleUtilities.shouldClear = true;
+		GasParticleUtils.shouldClear = true;
 	}
 	
 	public static void sendAddGasCloudPacket(PlayerEntity player, BlockPos pos) {

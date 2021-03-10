@@ -1,10 +1,9 @@
-package vini2003.xyz.harmfulgas.client.utilities;
+package vini2003.xyz.harmfulgas.client.util;
 
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.client.util.math.Vector3f;
 
-public class GasParticleUtilities {
+public class GasParticleUtils {
 	public static Vector3f[] rotatedVertices;
 	
 	public static boolean shouldClear = false;

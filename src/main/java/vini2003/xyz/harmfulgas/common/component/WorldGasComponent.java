@@ -8,12 +8,12 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.world.Heightmap;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
-import vini2003.xyz.harmfulgas.common.utilities.BlockPosUtilities;
-import vini2003.xyz.harmfulgas.common.utilities.DirectionUtilities;
-import vini2003.xyz.harmfulgas.common.utilities.GasUtilities;
+import vini2003.xyz.harmfulgas.common.util.BlockPosUtils;
+import vini2003.xyz.harmfulgas.common.util.DirectionUtils;
+import vini2003.xyz.harmfulgas.common.util.GasUtils;
+import vini2003.xyz.harmfulgas.common.util.TimeUtils;
 import vini2003.xyz.harmfulgas.registry.client.HarmfulGasNetworking;
 import vini2003.xyz.harmfulgas.registry.common.HarmfulGasComponents;
 
@@ -67,35 +67,34 @@ public final class WorldGasComponent implements Component, ServerTickingComponen
 			for (int i = start; i < end; ++i) {
 				BlockPos pos = nodesIndexed.get(i);
 				
-				double maxDist = 64F + age / (375.0F / (21 - speed));
+				double maxDist = TimeUtils.calculateMinimumDistance(age, speed);
 				
-				double posDist = BlockPosUtilities.minimumSquaredDistance(world.getPlayers(), pos);
+				double posDist = BlockPosUtils.minimumSquaredDistance(world.getPlayers(), pos);
 				
-				for (Direction direction : DirectionUtilities.DIRECTIONS) {
+				for (Direction direction : DirectionUtils.DIRECTIONS) {
 					BlockPos sidePos = pos.offset(direction);
 					
-					double sidePosDist = BlockPosUtilities.minimumSquaredDistance(world.getPlayers(), sidePos);
+					double sidePosDist = BlockPosUtils.minimumSquaredDistance(world.getPlayers(), sidePos);
 					
-					if (sidePos.getY() < 90
-							&& sidePos.getY() > 48
-							&& !nodes.contains(sidePos)
-							&& ((age % 600 == 0 && sidePosDist < posDist) || (age % speed == 0 && sidePos.isWithinDistance(originPos, maxDist)))
-							&& sidePos.getY() < world.getTopPosition(Heightmap.Type.WORLD_SURFACE, sidePos).getY() + 2) {
+					if (!nodes.contains(sidePos)
+							&& sidePos.getY() < TimeUtils.calculateMaximumHeight(world, sidePos, age, speed)
+							&& sidePos.getY() > TimeUtils.calculateMinimumHeight(age, speed)
+							&& ((age % TimeUtils.calculateFollowTime(age) == 0 && sidePosDist < posDist) || (age % speed == 0 && sidePos.isWithinDistance(originPos, maxDist)))) {
 						BlockState sideState = world.getBlockState(sidePos);
 						BlockState centerState = world.getBlockState(pos);
 						
-						if (GasUtilities.isTraversableForPropagation(world, centerState, pos, sideState, sidePos, direction)) {
+						if (GasUtils.isTraversableForPropagation(world, centerState, pos, sideState, sidePos, direction)) {
 							nodesToAdd.add(sidePos);
 						}
 					}
 				}
 				
 				for (PlayerEntity player : world.getPlayers()) {
-					double distance = BlockPosUtilities.squaredDistance(player, pos);
+					double distance = BlockPosUtils.squaredDistance(player, pos);
 					
 					cooldowns.putIfAbsent(player.getUuid(), 150);
 					
-					if (distance < 1.0D && cooldowns.get(player.getUuid()) == 0) {
+					if (distance < 1D && cooldowns.get(player.getUuid()) <= 0) {
 						player.damage(DamageSource.DROWN, 1.0F);
 					}
 					
