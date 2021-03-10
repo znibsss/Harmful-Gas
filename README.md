@@ -1,6 +1,6 @@
 # Harmful Gas
 
-This mod adds gases to your Minecraft world; some of whom may seek and destroy you.
+This mod adds gas to your Minecraft world; which will seek and destroy you.
 
 # Installing
 
