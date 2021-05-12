@@ -27,17 +27,11 @@ public class HarmfulGasCallbacks {
 		HarmfulGasNetworking.sendRefreshGasCloudPacket(newPlayer);
 	}
 	
-	private static void playerLeave(PlayerEntity player) {
-		WorldGasComponent gasComponent = WorldGasComponent.get(player.getEntityWorld());
-		
-		gasComponent.getParticles().remove(player.getUuid());
-	}
 	
 	public static void initialize() {
 		ServerEntityWorldChangeEvents.AFTER_PLAYER_CHANGE_WORLD.register(HarmfulGasCallbacks::playerChangeWorld);
 		
 		ServerPlayerEvents.AFTER_RESPAWN.register(HarmfulGasCallbacks::playerRespawn);
 		
-		PlayerLeaveCallback.EVENT.register(HarmfulGasCallbacks::playerLeave);
 	}
 }
